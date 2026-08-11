@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K-SemiTech HRD 스캐폴딩 시스템 — Stage 1</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jetbrains-mono@1.0.6/css/jetbrains-mono.css">
+<style>
+  :root{
+    --bg:#EDF1F5;
+    --surface:#FFFFFF;
+    --ink:#161E2B;
+    --ink-soft:#4B586A;
+    --line:#D7DEE6;
+    --steel:#2C5C8A;
+    --steel-deep:#1C3E5E;
+    --amber:#D98E2B;
+    --amber-soft:#FBEBD2;
+    --green:#3E7D58;
+    --green-soft:#E1F0E6;
+    --red:#B0442E;
+    --radius:14px;
+    --mono:'JetBrains Mono', ui-monospace, monospace;
+    --sans:'Pretendard', -apple-system, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:var(--sans); line-height:1.62; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:980px; margin:0 auto; padding:28px 20px 80px;}
+
+  /* ---------- Header ---------- */
+  header.top{
+    display:flex; align-items:baseline; justify-content:space-between;
+    padding-bottom:18px; margin-bottom:22px; border-bottom:2px solid var(--steel-deep);
+  }
+  header.top .brand{display:flex; align-items:baseline; gap:10px;}
+  header.top .brand .mark{
+    font-family:var(--mono); font-size:12px; letter-spacing:.08em; color:#fff;
+    background:var(--steel-deep); padding:3px 8px; border-radius:5px;
+  }
+  header.top h1{font-size:19px; margin:0; font-weight:800; letter-spacing:-0.01em;}
+  header.top .stagepill{font-family:var(--mono); font-size:12px; color:var(--ink-soft);}
+
+  .id-gate{
+    background:var(--amber-soft); border:1px solid var(--amber); border-radius:var(--radius);
+    padding:14px 18px; margin-bottom:18px;
+  }
+  .id-gate-row{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .id-gate label{font-size:12.5px; color:var(--ink); display:flex; align-items:center; gap:6px; font-weight:600;}
+  .id-gate input{border:1px solid var(--line); border-radius:7px; padding:7px 10px; font-size:13.5px; width:130px;}
+  .id-gate .gate-status{font-size:12.5px; color:var(--red); font-weight:600;}
+  .id-gate.confirmed{background:var(--green-soft); border-color:var(--green);}
+  .id-gate.confirmed input{background:#fff;}
+  fieldset.locked-overlay{opacity:.4; pointer-events:none;}
+
+  /* ---------- Case intro ---------- */
+  .case-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:22px 24px; margin-bottom:18px;
+  }
+  .case-card h2{margin:0 0 10px; font-size:16px; font-weight:800;}
+  .case-card p{margin:0 0 10px; font-size:14.5px; color:#233042;}
+  .case-card p:last-child{margin-bottom:0;}
+  .dilemma{
+    border-left:3px solid var(--amber); background:var(--amber-soft);
+    padding:12px 14px; border-radius:8px; font-size:14px; margin-top:10px;
+  }
+
+  .people{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:18px;}
+  .person{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:16px;
+  }
+  .person .avatar{
+    width:44px; height:44px; border-radius:50%; background:#DEE9F2;
+    display:flex; align-items:center; justify-content:center;
+    font-size:24px; margin-bottom:10px;
+  }
+  .person h3{margin:0 0 2px; font-size:14.5px; font-weight:800;}
+  .person .role{font-size:12px; color:var(--ink-soft); margin-bottom:8px;}
+  .person .voices{font-size:13px; color:#233042; border-top:1px dashed var(--line); padding-top:8px; margin-top:8px;}
+  .person .voices blockquote{margin:0 0 8px; padding-left:10px; border-left:2px solid var(--steel); font-style:italic;}
+
+  /* ---------- Stage tabs ---------- */
+  .stage-tabs{display:flex; gap:8px; margin-bottom:16px;}
+  .stage-tab{
+    flex:1; text-align:center; padding:10px 6px; border-radius:10px;
+    background:#DEE5EC; color:var(--ink-soft); font-weight:700; font-size:13px;
+    border:1px solid transparent; cursor:pointer; position:relative;
+  }
+  .stage-tab .sub{display:block; font-weight:500; font-size:11px; margin-top:2px;}
+  .stage-tab.active{background:var(--steel-deep); color:#fff;}
+  .stage-tab.done{background:var(--green-soft); color:var(--green); border-color:var(--green);}
+  .stage-tab.terminated{background:#FBE4E0; color:var(--red); border-color:var(--red);}
+  .stage-tab.locked{cursor:not-allowed; opacity:.55;}
+
+  /* ---------- Main layout ---------- */
+  .stage-grid{display:grid; grid-template-columns:1fr 260px; gap:16px; align-items:start;}
+  @media (max-width:760px){ .stage-grid{grid-template-columns:1fr;} .people{grid-template-columns:1fr;} }
+
+  .chat-panel{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:20px; min-height:420px; display:flex; flex-direction:column;
+  }
+  .concept-title{font-size:13px; color:var(--ink-soft); font-family:var(--mono); margin-bottom:10px;}
+  .concept-title-row{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:2px;}
+  .concept-title-row .concept-title{margin-bottom:8px;}
+  button.ghost.small{padding:5px 10px; font-size:11.5px; border-radius:6px;}
+  .terminated-banner{
+    background:#FBE4E0; border:1px solid var(--red); color:var(--red);
+    padding:14px 16px; border-radius:10px; font-size:14px; font-weight:700; margin-top:14px;
+  }
+  .msg{max-width:88%; padding:12px 14px; border-radius:12px; font-size:14.5px; margin-bottom:12px; white-space:pre-wrap;}
+  .msg.ai{background:#EEF3F8; border:1px solid #D9E4EE; border-top-left-radius:3px; align-self:flex-start;}
+  .msg.student{background:var(--steel-deep); color:#fff; border-top-right-radius:3px; align-self:flex-end; margin-left:auto;}
+  .msg-row{display:flex;}
+  .composer{margin-top:auto; padding-top:14px; border-top:1px solid var(--line);}
+  textarea{
+    width:100%; min-height:78px; resize:vertical; border:1px solid var(--line); border-radius:10px;
+    padding:10px 12px; font-family:var(--sans); font-size:14px; outline:none;
+  }
+  textarea:focus{border-color:var(--steel);}
+  .composer-row{display:flex; justify-content:flex-end; gap:8px; margin-top:8px;}
+  button.primary{
+    background:var(--steel-deep); color:#fff; border:none; padding:9px 18px;
+    border-radius:8px; font-weight:700; font-size:13.5px; cursor:pointer;
+  }
+  button.primary:hover{background:var(--steel);}
+  button.ghost{
+    background:transparent; color:var(--ink-soft); border:1px solid var(--line);
+    padding:9px 14px; border-radius:8px; font-size:13px; cursor:pointer;
+  }
+  button:disabled{opacity:.5; cursor:not-allowed;}
+
+  /* ---------- Sidebar readout ---------- */
+  .readout{
+    background:var(--steel-deep); color:#EAF1F8; border-radius:var(--radius);
+    padding:16px; font-family:var(--mono); position:sticky; top:16px;
+  }
+  .readout .label{font-size:10.5px; letter-spacing:.08em; color:#9FB6CB; text-transform:uppercase;}
+  .readout .level-badge{
+    font-size:34px; font-weight:800; margin:2px 0 4px; display:flex; align-items:baseline; gap:6px;
+  }
+  .readout .level-badge .of{font-size:13px; color:#9FB6CB;}
+  .readout .bar{height:6px; background:#294D6E; border-radius:4px; overflow:hidden; margin:10px 0 16px;}
+  .readout .bar-fill{height:100%; background:var(--amber); width:0%; transition:width .4s ease;}
+  .readout .concept-list{list-style:none; padding:0; margin:0; font-size:12px;}
+  .readout .concept-list li{
+    display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid #26466A; color:#C4D5E5;
+  }
+  .readout .concept-list li:last-child{border-bottom:none;}
+  .readout .dot{width:8px; height:8px; border-radius:50%; background:#3E5C7C; flex-shrink:0;}
+  .readout .concept-list li.hit .dot{background:#6FE0A0;}
+  .readout .concept-list li.hit{color:#fff;}
+
+  .complete-banner{
+    background:var(--green-soft); border:1px solid var(--green); color:var(--green);
+    padding:14px 16px; border-radius:10px; font-size:14px; font-weight:700; margin-top:14px;
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+  }
+  .complete-banner button{background:var(--green); color:#fff; border:none; padding:8px 14px; border-radius:7px; font-size:13px; cursor:pointer; font-weight:700;}
+
+  .final-screen{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:26px; text-align:center;}
+  .final-screen h2{font-size:20px; margin-top:0;}
+  .idbox{display:flex; gap:8px; justify-content:center; margin:16px 0;}
+  .idbox input{border:1px solid var(--line); border-radius:8px; padding:9px 12px; font-size:14px; width:220px;}
+  #submitStatus{font-size:13px; color:var(--ink-soft); margin-top:10px; font-family:var(--mono);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <span class="mark">KST · HRD-ITS</span>
+      <h1>K-SemiTech 온보딩 학습 시스템</h1>
+    </div>
+    <span class="stagepill">Stage 1 — 성인학습·일터학습이론</span>
+  </header>
+
+  <section class="id-gate" id="idGate">
+    <div class="id-gate-row">
+      <label>이름 <input id="gateName" type="text" placeholder="예: 홍길동"></label>
+      <label>학번 <input id="gateNumber" type="text" placeholder="예: 2026001"></label>
+      <button class="primary" id="gateConfirmBtn" type="button">확인하고 시작하기</button>
+      <span id="gateStatus" class="gate-status"></span>
+    </div>
+  </section>
+
+  <section class="case-card">
+    <h2>산업 배경</h2>
+    <p>K-SemiTech(KST)은 반도체·정밀장비를 생산하는 20년 업력의 제조기업이다. 최근 3년간 AI 기반 공정자동화를 빠르게 도입하면서, 회사는 두 가지 변화를 동시에 겪고 있다. 첫째, 채용 기준을 학력·연차 중심에서 직무 역량과 성장 가능성 중심으로 전환하며 다양한 배경의 신입·경력 인력이 유입되고 있다. 둘째, 자동화 설비가 기존 공정을 대체하면서, 수십 년간 현장에서 축적된 베테랑 엔지니어의 암묵지(tacit knowledge)가 여전히 유효한 자산인지, 재구성이 필요한 것인지를 둘러싼 조직 내 긴장이 커지고 있다.</p>
+    <p>회사는 그동안 신입 인력에게 합숙 교육과 현장 멘토링을 결합한 온보딩 체계를 운영해왔다. 그러나 최근 HRD팀에 접수된 현장 피드백은 이 체계의 실효성에 의문을 제기하고 있다.</p>
+    <div class="dilemma">
+      <strong>핵심 딜레마 —</strong> HRD팀 교육기획 담당 이서연은 내년도 신입 온보딩 프로그램 개편안을 준비해야 한다. 그런데 18년차 베테랑 공정엔지니어 박현우가 담당하던 라인에 AI 기반 이상감지 시스템이 도입되면서, 시스템이 박현우가 '괜찮다'고 판단했던 공정 이상을 감지해낸 사건이 발생한다. 이는 박현우에게 '내가 30년 가까이 믿어온 판단 방식이 더 이상 충분하지 않을 수도 있다'는 근본적인 흔들림(disorienting dilemma)을 안긴다. 이서연은 개인의 학습 방식 차이를 넘어, 조직 차원에서 학습 시스템 자체를 어떻게 재설계할 것인가라는 질문과 마주하게 된다.
+    </div>
+  </section>
+
+  <section class="people">
+    <div class="person" data-person="1">
+      <div class="avatar">👨‍🔧</div>
+      <h3>박현우</h3>
+      <div class="role">베테랑 공정엔지니어 · 18년차</div>
+      <div class="voices">
+        <blockquote>"제가 이 라인에 처음 배치됐을 때가 스물여덟이었어요. 그때 사수였던 최 부장님한테 배운 게, 계기판 숫자보다 소리를 먼저 들으라는 거였습니다. 모터 소리가 미세하게 달라지는 순간, 숫자는 아직 정상 범위 안에 있어도 뭔가 잘못되고 있다는 걸 알 수 있어요. 그걸 어떻게 매뉴얼에 적습니까?"</blockquote>
+        <blockquote>"지난달에... AI 시스템이 저보다 먼저 이상을 잡아냈어요. 제가 '괜찮다'고 판단했던 공정을요. 처음엔 오작동인 줄 알았습니다. 근데 확인해보니 진짜 이상 징후가 있었더라고요, 아주 초기 단계의. 저는 몰랐던 걸 기계는 알았던 겁니다."</blockquote>
+        <blockquote>"그날 이후로 계속 생각합니다. 제가 30년 가까이 믿어온 게, 정말 '경험에서 우러난 통찰'이었을까요, 아니면 그냥 운이 좋았던 걸까요. 후배들 앞에서 흔들리는 모습을 보이기도 싫고요. 근데 솔직히... 지금 제가 김지수한테 뭘 가르쳐야 하는지도 잘 모르겠습니다."</blockquote>
+      </div>
+    </div>
+    <div class="person" data-person="2">
+      <div class="avatar">👩‍💻</div>
+      <h3>김지수</h3>
+      <div class="role">신입 엔지니어 · 6개월차</div>
+      <div class="voices">
+        <blockquote>"저는 뭐든 원리를 먼저 알아야 마음이 편해요. 대학 다닐 때도 실험하기 전에 이론을 완전히 이해하고 들어가는 스타일이었거든요. 그런데 여기 와서는 계속 '일단 해봐', '옆에서 보면서 배워'라는 말만 들어요."</blockquote>
+        <blockquote>"박현우 선배님이 나쁜 분은 절대 아니에요. 근데 뭘 물어보면 '음... 이건 그냥 느낌으로 아는 건데'라고 하실 때마다 막막해요. 실수하면 안 된다는 부담은 있는데, 왜 안 되는지에 대한 설명은 부족하니까 오히려 더 긴장하게 돼요."</blockquote>
+        <blockquote>"온라인 교육 자료는 있는데, 너무 일반적인 내용이라 실제 라인 상황이랑 안 맞아요. 저 스스로 유튜브도 찾아보고 논문도 찾아보는데, 그게 맞는 방향인지 확신이 안 서고... 이렇게라도 안 하면 아무것도 못 배우는 것 같아서 불안해요."</blockquote>
+      </div>
+    </div>
+    <div class="person" data-person="3">
+      <div class="avatar">👩‍💼</div>
+      <h3>이서연</h3>
+      <div class="role">HRD팀 교육기획 담당</div>
+      <div class="voices">
+        <blockquote>"온보딩 프로그램 개편안, 벌써 세 번째 초안을 갈아엎었어요. 처음엔 '현장 멘토링을 늘리자'였는데, 박현우 선배님 같은 베테랑들도 지금 흔들리고 있다는 걸 알고 나니까 그것만으로는 안 되겠더라고요. 그렇다고 온라인 콘텐츠를 늘리는 것도 답은 아닌 게, 김지수 씨는 이미 혼자 너무 많이 찾아보고 있어요."</blockquote>
+        <blockquote>"저는 이 문제를 '누가 옳으냐'로 보면 안 된다고 생각해요. 두 분 다 각자 나름의 방식으로 최선을 다하고 있는 거니까요. 근데 그 두 방식이 서로 연결이 안 되고 있다는 게 진짜 문제예요."</blockquote>
+        <blockquote>"솔직히 말하면 저도 확신이 없어요. 회사에서는 '효율적인 온보딩'을 원하는데, 이게 단순히 프로그램 하나 바꾼다고 해결될 문제가 아니라는 느낌이 들거든요. 조직 전체가 학습하는 방식 자체를 다시 봐야 하는 게 아닐까, 그런 생각까지 하게 돼요."</blockquote>
+      </div>
+    </div>
+  </section>
+
+  <nav class="stage-tabs" id="stageTabs">
+    <div class="stage-tab active" data-stage="A">1-A<span class="sub">성인학습이론</span></div>
+    <div class="stage-tab locked" data-stage="B">1-B<span class="sub">전환학습이론</span></div>
+    <div class="stage-tab locked" data-stage="C">1-C<span class="sub">일터학습 통합</span></div>
+  </nav>
+
+  <div id="stageArea"></div>
+
+</div>
+
+<script>
+/* =========================================================
+   1) 케이스 상황연결 키
+   ========================================================= */
+const COOC_NAMES = ['박현우','김지수','이서연','ai','인공지능','이상감지'];
+function normalize(t){ return (t||'').toLowerCase(); }
+function hasCooc(text){
+  const n = normalize(text);
+  return COOC_NAMES.some(x => n.includes(x.toLowerCase()));
+}
+function detectConcept(text, concept){
+  const norm = normalize(text);
+  for(const kw of concept.keywords){
+    const kwNorm = kw.toLowerCase();
+    const idx = norm.indexOf(kwNorm);
+    if(idx !== -1){
+      const s = Math.max(0, idx-10), e = Math.min(norm.length, idx+kwNorm.length+10);
+      const win = norm.slice(s,e);
+      const neg = (concept.negations||[]).some(x=>win.includes(x));
+      if(!neg) return true;
+    }
+  }
+  return false;
+}
+const SOLUTION_WORDS = ['설계','제안','활동','프로그램','만들','도입','운영','방안'];
+function hasSolutionIntent(text){
+  const n = normalize(text);
+  return SOLUTION_WORDS.some(w=>n.includes(w));
+}
+const IDK_PATTERNS = ['모르겠','글쎄','패스','몰라요','모름','모르곘','노답','그냥요'];
+function isLowEffort(text){
+  const t = (text||'').trim();
+  if(t.length < 6) return true;
+  const n = normalize(t);
+  return IDK_PATTERNS.some(p=>n.includes(p));
+}
+const MIN_ANSWER_LENGTH = 20;
+function isTooShort(text){
+  return (text||'').trim().length < MIN_ANSWER_LENGTH;
+}
+const OFFTOPIC_PATTERNS = [
+  '너는 누구','넌 누구','너 누구','넌 뭐야','너 뭐야','정체가 뭐','너의 정체',
+  '네가 다 답','답을 다 말해','정답을 말해','답을 알려줘','답 알려줘','정답 알려줘',
+  '노래','잘해?','잘하니','재밌는 얘기','심심해','너 몇 살','너 나이',
+  '너 남자','너 여자','좋아하는 음식','너의 취미','너 애인','너 사랑'
+];
+function isOffTopic(text){
+  const n = normalize(text);
+  return OFFTOPIC_PATTERNS.some(p=>n.includes(p));
+}
+function offTopicReply(key, count){
+  const firstLine = STAGES[key].start.split('\n')[0];
+  let msg = `이 케이스와 관련 없는 이야기네요. 다시 K-SemiTech 사례로 집중해볼까요?\n\n${firstLine}`;
+  if(count === 2){
+    msg += `\n\n⚠ 이런 이탈이 한 번 더 반복되면 이 사례검토는 종료되고 0점으로 기록됩니다.`;
+  }
+  return msg;
+}
+
+/* =========================================================
+   2) 개념 클러스터 (6개 층 통합, Stage별)
+   ========================================================= */
+const CLUSTERS = {
+  A: [
+    {id:'andragogy', label:'Andragogy', keywords:['andragogy','andragogic','안드라고지','성인교육학','성인학습','자기주도적 학습','문제중심학습','경험을 자원','스스로 배우는','성인 학습자','안드라거지','안드라고지이','androgogy'], negations:['안 맞','아니','않','없']},
+    {id:'kolb', label:"Kolb's Experiential Learning Cycle", keywords:['kolb','experiential learning','elc','경험학습이론','경험학습순환','구체적 경험','성찰적 관찰','추상적 개념화','능동적 실험','겪어보고','경험→성찰','순환구조','콜브','콜부','경혐학습'], negations:['안 맞','안 되','아니','없']},
+    {id:'bandura', label:"Bandura's Social Learning (Modelling)", keywords:['bandura','modelling','modeling','observational learning','관찰학습','모델링','모방학습','사회학습이론','롤모델','옆에서 보고 배우','따라하며 배우','본보기','어깨너머','모델닝','모델딩','반두라','밴듀라'], negations:['아니','안 통해','안 돼','없']},
+    {id:'selfeff', label:'Self-efficacy', keywords:['self-efficacy','selfefficacy','자기효능감','magnitude','strength','generality','자신감','할 수 있다는 믿음','스스로에 대한 확신','셀프이피커시'], negations:['상관없']},
+    {id:'sdl', label:'Self-Directed Learning (SDL)', keywords:['sdl','self-directed learning','self directed','자기주도학습','autodidaxy','학습자 통제','개인 자율성','자기관리','스스로 계획','혼자서 학습','셀프다이렉티드'], negations:['안 되','안 맞','아니']},
+    {id:'motiv', label:'Training Motivation/Engagement', keywords:['training motivation','training engagement','학습동기','훈련참여도','참여 결정','학습 중 동기','전이 동기','목표수립','우선순위화','목표지속','몰입도','의욕','모티베이션'], negations:['안 맞']},
+    {id:'forminc', label:'Formal/Informal/Incidental Learning', keywords:['formal learning','informal learning','incidental learning','formal','informal','incidental','형식학습','비형식학습','무형식학습','우연학습','우발학습','공식 교육','체계적인 커리큘럼','정해진 커리큘럼 없이','경험적 학습','의도치 않게 배움','부산물로 얻은 지식','현장에서 자연스럽게'], negations:['아니','안 맞']}
+  ],
+  B: [
+    {id:'tl', label:'Transformative Learning', keywords:['transformative learning','mezirow','전환학습','관점 전환','인식 전환','의미구조','세계관이 바뀌','가치관 재구성','메지로우','메지로'], negations:['아니','안 바뀌']},
+    {id:'dd', label:'Disorienting Dilemma', keywords:['disorienting dilemma','dilemma','딜레마','방향감각을 잃','흔들림','흔들리','혼란','충격적 사건','믿음이 깨짐','당황스러운','기존 방식이 안 통','디스오리엔팅'], negations:['아니']},
+    {id:'ct', label:'Critical Thinking', keywords:['critical thinking','critical reflection','비판적 성찰','비판적 사고','스스로를 돌아봄','자기 가정을 의심','근본 원인','왜 그렇게 믿었','크리티컬'], negations:['필요 없','아니']},
+    {id:'rd', label:'Reflective Discourse', keywords:['reflective discourse','discourse','성찰적 담론','대화를 통한 성찰','이야기하며 정리','의견을 나누며','공유된 해석','디스코스'], negations:['필요 없','혼자 해결']},
+    {id:'behavior', label:'Behavior', keywords:['behavior','새로운 역할','역할을 수행','행동 변화','달라진 행동','새로운 방식으로 행동','자신감을 갖게','수행할 수 있다는 자신감','실천으로 옮기'], negations:['아니','안 바뀌']}
+  ],
+  C: [
+    {id:'loop', label:'Single/Double-loop Learning', keywords:['single-loop','double-loop','single loop','double loop','단일순환학습','이중순환학습','전술만 바꿈','방법만 수정','가정 자체를 의심','근본적 재검토','싱글루프','더블루프'], negations:['아니','필요 없']},
+    {id:'cop', label:'Communities of Practice (CoP)', keywords:['communities of practice','cop','실천공동체','실행공동체','legitimate peripheral participation','정당한 주변적 참여','함께 배우는 공동체','지식을 나누는 모임','자발적 학습 모임','커뮤니티스'], negations:['필요 없','아니']}
+  ]
+};
+
+/* =========================================================
+   3) 스테이지별 스크립트 (시작질문 + Level 0~3 AI 메시지)
+   ========================================================= */
+const STAGES = {
+  A: {
+    label:'Stage 1-A · 성인학습이론',
+    start: `이서연은 내년도 온보딩 프로그램을 다시 설계해야 합니다. 박현우와 김지수의 학습방식 차이를 설명하고 이 차이를 고려할 때, 여러분이라면 이서연에게 어떤 방향을 제안하시겠습니까?
+
+(Andragogy, Kolb's Experiential Learning Cycle, Bandura's Social Learning Theory, Formal/Informal/Incidental Learning, Self-Directed Learning 이론 중 최소 1개의 개념을 포함해 설명해주세요.)`,
+    levelMsg: {
+      1: `정확히 짚으셨습니다. Kolb의 경험학습이론에서, 경험이 실제 학습으로 전환되려면 어떤 단계들을 거쳐야 하나요? 박현우와 김지수는 각각 어디에 머물러 있나요?`,
+      2: `정확합니다. 박현우의 경험이 '관찰 가능한 모델'이 되어야 김지수가 배울 수 있겠죠. Bandura의 이론에서 이걸 뭐라 부르나요? 성공하려면 김지수의 어떤 심리적 요인(self-efficacy)도 함께 필요할까요?`,
+      3: `훌륭합니다. 두 개념을 정확히 통합하셨고, 구체적인 방향까지 제시하셨습니다. Stage 1-A를 완료합니다.`
+    },
+    hints: {
+      0: [
+        `둘 다 이미 하고 있는데도 갈등이 생겼죠. Andragogy 이론에서, 성인 학습자가 무엇을 '학습자원'으로 여기는지에 대한 가정이 있었는데, 그 개념으로 설명해볼 수 있을까요?`,
+        `힌트를 조금 더 드릴게요 — Andragogy의 5대 가정 중 하나는 '성인은 살아오며 쌓은 경험 자체를 학습의 재료로 삼는다'는 것입니다. 박현우가 가진 18년치 경험을 김지수가 학습재료로 쓸 수 있게 하려면 무엇이 필요할지 생각해보시겠어요?`,
+        `조금 더 직접적으로 드릴게요 — "경험을 자원으로 삼는다"는 표현을 답변에 넣고, 그게 박현우/김지수 중 누구의 상황을 설명하는지 한 문장으로 이어서 적어보세요.`
+      ],
+      1: [
+        `지금 답변에서는 앞서 이야기하신 개념과 다른 새로운 연결이 보이지 않네요. Kolb의 경험학습 순환에서 박현우와 김지수가 각각 어느 단계에 머물러 있는지, 조금 더 구체적으로 설명해주시겠어요?`,
+        `힌트를 더 드릴게요 — Kolb의 순환은 '구체적 경험 → 성찰적 관찰 → 추상적 개념화 → 능동적 실험'의 4단계입니다. 박현우는 경험은 있지만 성찰·개념화가 부족하고, 김지수는 그 반대일 수 있어요. 이 관점에서 다시 답변해보시겠어요?`,
+        `조금 더 직접적으로 드릴게요 — "경험→성찰→개념화→실험" 중 두 사람이 각각 어느 지점에 머물러 있는지, 그 단계 이름을 답변에 넣어서 적어보세요.`
+      ],
+      2: [
+        `아직 새로운 개념이 드러나지 않았어요. Bandura의 관찰학습(Modelling)이나 self-efficacy 개념을 활용해서, 김지수가 박현우의 경험을 어떻게 배울 수 있을지 다시 설명해주시겠어요?`,
+        `힌트를 더 드릴게요 — Bandura의 사회학습이론에서 관찰학습(Modelling)이 일어나려면 관찰 대상이 자기 행동을 명확히 보여줘야 하고, 관찰자에게는 '나도 할 수 있다'는 self-efficacy(자기효능감)가 있어야 합니다. 박현우의 경험을 어떻게 '보여지는 형태'로 만들 수 있을지 제안해보시겠어요?`,
+        `조금 더 직접적으로 드릴게요 — "modelling"과 "self-efficacy" 두 단어를 답변에 넣고, 각각 누구에게 필요한지 한 문장씩 적어보세요.`
+      ]
+    },
+    weight: {0:0, 1:25, 2:60, 3:100},
+    standardSummary: `이번 Stage에서는 성인학습이론이 K-SemiTech 온보딩 설계에 어떻게 적용되는지 살펴봤습니다. Andragogy에 따르면 성인 학습자는 자신의 경험을 학습자원으로 삼는데, 박현우의 18년 경력은 그 자체로 훌륭한 학습자원이 될 수 있습니다. Kolb의 경험학습이론에서, 박현우는 구체적 경험(Concrete Experience)은 풍부하지만 그 경험을 개념화하고 언어로 정리하는 단계(Abstract Conceptualization)가 약한 반면, 김지수는 그 개념화와 능동적 실험(Active Experimentation)을 먼저 원하지만 그 바탕이 될 구체적 경험이 부족합니다. Bandura의 사회학습이론은 관찰학습(Modelling)이 일어나려면 자기효능감(Self-efficacy)이 함께 필요하다고 강조합니다. 김지수가 박현우의 현장 판단 과정을 직접 관찰하고 따라 해볼 기회가 있어야 이 모델링이 실제 학습으로 이어지며, 이때 김지수 스스로 "나도 할 수 있다"는 자기효능감을 갖는 것이 관건입니다. Marsick & Watkins의 일터학습 유형 구분은 두 사람의 학습 방식 차이를 더 명확히 보여줍니다 — 박현우는 정해진 커리큘럼 없이 현장에서 체득한 Informal Learning에 익숙한 반면, 김지수는 매뉴얼이나 강의처럼 체계적으로 구조화된 Formal Learning 기반의 학습 방식을 추구합니다. 결국 이서연의 온보딩 프로그램은 이 개념들을 통합해, 박현우의 경험을 관찰 가능한 형태로 구조화하고 김지수의 자기주도적 학습 욕구를 함께 충족시키는 방향으로 설계되어야 합니다.`
+  },
+  B: {
+    label:'Stage 1-B · Mezirow의 전환학습이론',
+    start: `이번엔 박현우의 시점으로 들어가 볼게요. AI 이상감지 시스템이 그가 '괜찮다'고 판단했던 공정 이상을 먼저 잡아낸 이후, 그는 '내가 30년 가까이 믿어온 판단 방식이 충분하지 않을 수도 있다'고 말합니다.
+
+여러분이 이서연이라면, 지금 박현우가 겪고 있는 심리적 변화를 어떻게 이해하고, 그를 돕기 위해 무엇을 하겠습니까?
+
+(Mezirow의 전환학습이론에서 학습한 개념을 포함해주세요)`,
+    levelMsg: {
+      1: `정확한 용어입니다. 박현우의 어떤 구체적 경험이 왜 'disorienting'했는지 설명해볼 수 있을까요?`,
+      2: `좋습니다. Mezirow는 이 dilemma 이후 Critical Thinking과 Reflective Discourse를 거쳐야 한다고 봤습니다. 지금 박현우는 이 흐름의 어디에 있고, 무엇이 안 되어 있나요?`,
+      3: `정확합니다. 전환학습의 전 과정을 잘 짚으셨고, 구체적인 개입 방향까지 제시하셨습니다. Stage 1-B를 완료합니다.`
+    },
+    hints: {
+      0: [
+        `지금 그는 단순 피로가 아니라 신념체계 자체가 흔들리는 경험을 하고 있습니다. Mezirow 이론에서 이런 사건을 부르는 개념이 있었는데, 떠오르시나요?`,
+        `힌트를 더 드릴게요 — Mezirow는 기존에 당연하게 여기던 가정이 깨지는 사건을 'disorienting dilemma'라고 불렀습니다. 박현우에게 무엇이 '당연했던 가정'이었고, 그게 어떻게 깨졌는지 생각해보시겠어요?`,
+        `조금 더 직접적으로 드릴게요 — "disorienting dilemma"라는 용어를 답변에 넣고, 박현우가 겪은 구체적 사건(AI가 먼저 이상을 감지한 일)과 한 문장으로 연결해보세요.`
+      ],
+      1: [
+        `새로운 설명이 보이지 않네요. 박현우의 어떤 구체적 경험이 왜 disorienting했는지 조금 더 자세히 말씀해주시겠어요?`,
+        `힌트를 더 드릴게요 — 박현우는 '내 경험이 곧 정답'이라는 전제를 갖고 있었는데, AI가 그 전제를 깨뜨렸습니다. 이 부분을 조금 더 구체적으로 풀어서 설명해보시겠어요?`,
+        `조금 더 직접적으로 드릴게요 — "믿음이 깨졌다" 또는 "전제가 흔들렸다"는 표현을 답변에 넣고, 왜 그런 일이 일어났는지 한 문장으로 적어보세요.`
+      ],
+      2: [
+        `아직 다음 단계가 드러나지 않았어요. Critical Thinking과 Reflective Discourse 중 박현우에게 지금 필요한 것이 무엇인지 다시 설명해주시겠어요?`,
+        `힌트를 더 드릴게요 — Critical Thinking은 '왜 그렇게 믿었는지' 스스로 따져보는 것이고, Reflective Discourse는 '다른 사람과 대화하며 그 믿음을 다시 검토하는 것'입니다. 지금 박현우에게 필요한 건 둘 중 무엇일까요?`,
+        `조금 더 직접적으로 드릴게요 — "critical thinking" 또는 "reflective discourse" 둘 중 하나를 답변에 넣고, 박현우를 위해 어떤 자리를 마련하면 좋을지 한 문장으로 제안해보세요.`
+      ]
+    },
+    weight: {0:0, 1:25, 2:60, 3:100},
+    standardSummary: `이번 Stage에서는 Mezirow의 전환학습이론을 통해 박현우의 심리적 변화 과정을 살펴봤습니다. 전환학습은 단순히 기존 인지 능력을 새로운 영역으로 확장하는 학습이 아니라, 지금까지 당연하게 여겨온 의미구조(meaning structure) 자체를 극적이고 근본적으로 전환하는 학습입니다. 이 과정은 네 가지 구성요소로 이루어집니다. 첫째, Experience 단계에서는 경험을 통해 새로운 의미를 얻게 되는데, 그 계기가 되는 것이 기존의 사고방식에 도전하는 사건인 Disorienting Dilemma입니다 — 박현우에게는 AI 시스템이 자신보다 먼저 공정 이상을 감지한 사건이 여기에 해당합니다. 둘째, Critical Thinking 단계에서는 그 경험을 바탕으로 자신이 갖고 있던 가정과 신념을 비판적으로 검토합니다. 셋째, Reflective Discourse 단계에서는 다른 사람과의 대화를 통해 공유된 이해와 해석적 의미를 찾아갑니다. 마지막으로 Behavior 단계에서는 새로운 역할을 수행할 수 있다는 자신감을 갖추게 됩니다. 박현우가 이 네 단계를 온전히 통과하려면, 이서연은 그가 안전하게 성찰하고(Critical Thinking) 동료와 대화할 수 있는(Reflective Discourse) 자리를 마련해, 궁극적으로 새로운 역할에 대한 자신감(Behavior)으로 이어지도록 도와야 합니다.`
+  },
+  C: {
+    label:'Stage 1-C · 일터학습이론 통합',
+    start: `지금까지의 논의를 종합해서, 이서연이 조직 차원에서 이 문제를 다루려면 어떤 프로그램을 설계해야 할까요?
+
+(Single/Double-loop Learning과 Communities of Practice 두 개념을 모두 활용해서, 300자 이상으로 작성해주세요.)`,
+    levelMsg: {
+      1: `정확히 짚으셨습니다. 이 개념을 박현우나 이 케이스의 구체적 상황과 연결해서 설명해주시겠어요?`,
+      2: `좋습니다 — 케이스 상황과 잘 연결하셨어요. 이제 Single/Double-loop Learning과 Communities of Practice 두 개념을 모두 활용해서, 이서연이 실행할 구체적 프로그램을 300자 이상으로 제안해주시겠어요?`,
+      3: `훌륭합니다. Single/Double-loop Learning과 Communities of Practice를 모두 활용해 프로그램 설계안을 완성하셨습니다. 이것으로 Stage 1 전체를 완료합니다. 아래에서 지금까지의 학습 결과를 정리해보세요.`
+    },
+    hints: {
+      0: [
+        `이서연이 조직 차원에서 문제를 다루려면, 지금 상황이 '전술만 바꾸는 수준'인지 '근본적인 가정 자체를 재검토하는 수준'인지부터 구분해야 합니다. 이런 구분을 하는 이론이 있었죠?`,
+        `힌트를 더 드릴게요 — Argyris & Schön의 Single-loop/Double-loop Learning 개념입니다. 박현우가 지금 어느 쪽에 머물러 있고, 어느 쪽으로 가야 하는지 생각해보시겠어요?`,
+        `조금 더 직접적으로 드릴게요 — "double-loop learning"이라는 표현을 답변에 넣고, 박현우가 재검토해야 할 '가정'이 무엇인지 한 문장으로 적어보세요.`
+      ],
+      1: [
+        `Single/Double-loop Learning을 짚으셨네요. 이제 이걸 조직 차원에서 지속시키려면 어떤 '모임'이나 '관계'가 필요할지, 박현우가 고립되지 않을 방법을 생각해보시겠어요?`,
+        `힌트를 더 드릴게요 — Lave & Wenger의 Communities of Practice(실천공동체) 개념입니다. 정당한 주변적 참여를 통해 함께 배우는 공동체를 만드는 것이 한 방법입니다.`,
+        `조금 더 직접적으로 드릴게요 — "communities of practice" 또는 "CoP"라는 표현을 답변에 넣고, 이 공동체를 회사가 공식적으로 지원할지 여부를 한 문장으로 적어보세요.`
+      ],
+      2: [
+        `최종 설계안에는 Single/Double-loop Learning과 Communities of Practice(CoP) 두 개념이 모두 들어가야 해요. 아직 둘 중 하나가 빠져있는 것 같습니다 — 둘 다 넣어서 다시 설명해주시겠어요?`,
+        `힌트를 더 드릴게요 — Double-loop Learning(가정 자체 재검토)과 CoP(실천공동체를 통한 학습) 두 가지를 각각 한 문장씩 박현우 상황에 적용해보세요.`,
+        `조금 더 직접적으로 드릴게요 — "double-loop"과 "communities of practice" 두 단어를 모두 답변에 포함하고, 300자 이상으로 구체적인 프로그램 형태를 제안해보세요.`
+      ]
+    },
+    weight: {0:0, 1:20, 2:50, 3:100},
+    standardSummary: `이번 Stage에서는 조직 차원의 학습 시스템을 Single/Double-loop Learning과 Communities of Practice로 통합했습니다. Single-loop Learning이 문제 상황에서 전술만 바꾸는 것이라면, Double-loop Learning은 그 기저에 있는 가정 자체를 재검토하는 것입니다. 박현우의 사례처럼 AI 도입이라는 구조적 변화 앞에서는 Double-loop 수준의 성찰이 필요합니다. 동시에 이런 성찰이 개인에게 그치지 않고 조직의 자산이 되려면, Lave & Wenger가 말한 Communities of Practice — 정당한 주변적 참여를 통해 함께 배우는 공동체 — 를 구축해야 합니다. 이서연의 최종 과제는 이 실천공동체를 회사가 공식적으로 지원할지, 자연발생적으로 둘지를 판단하고, 그에 맞는 구체적 프로그램을 설계하는 것입니다.`
+  }
+};
+const STAGE_ORDER = ['A','B','C'];
+const STAGE_SHORT = {A:'1-A', B:'1-B', C:'1-C'};
+
+/* =========================================================
+   4) 상태
+   ========================================================= */
+const state = {
+  current: 'A',
+  matched: {A:new Set(), B:new Set(), C:new Set()},
+  level: {A:0, B:0, C:0},
+  done: {A:false, B:false, C:false},
+  terminated: {A:false, B:false, C:false},
+  offTopicCount: {A:0, B:0, C:0},
+  transcript: {A:[], B:[], C:[]},
+  stuckIdx: {A:{0:0,1:0,2:0}, B:{0:0,1:0,2:0}, C:{0:0,1:0,2:0}},
+  showFinal: false,
+  studentName: '',
+  studentNumber: '',
+  gateConfirmed: false
+};
+
+function nextHint(stageKey, level){
+  const arr = STAGES[stageKey].hints[level];
+  const idx = Math.min(state.stuckIdx[stageKey][level], arr.length - 1);
+  state.stuckIdx[stageKey][level] = Math.min(state.stuckIdx[stageKey][level] + 1, arr.length - 1);
+  return arr[idx];
+}
+
+/* =========================================================
+   5) 규칙기반 판정 (Stage B/C 그대로 사용 + Stage A의 폴백으로도 사용)
+   ========================================================= */
+function localJudge(key, text){
+  if(isOffTopic(text)){
+    return { feedback: '', offTopic: true };
+  }
+
+  const stage = STAGES[key];
+  const concepts = CLUSTERS[key];
+  const priorLevel = state.level[key];
+  const lowEffort = isLowEffort(text);
+  const tooShort = !lowEffort && isTooShort(text);
+
+  if(lowEffort){
+    const hint = nextHint(key, priorLevel);
+    return { feedback: '괜찮습니다, 다시 한번 천천히 생각해볼까요?\n\n' + hint, offTopic: false };
+  }
+  if(tooShort){
+    return { feedback: `조금 더 자세히 설명해주시겠어요? 최소 2문장 이상, ${MIN_ANSWER_LENGTH}자 이상으로 작성해주시면 좋겠습니다.`, offTopic: false };
+  }
+
+  // 새로 감지된 개념은 항상 누적 반영 (있으면 추가, 없어도 아래 판정은 계속 진행)
+  const turnNew = concepts.filter(c => !state.matched[key].has(c.id) && detectConcept(text, c));
+  turnNew.forEach(c => state.matched[key].add(c.id));
+
+  const cooc = hasCooc(text) || state.transcript[key].some(t => t.role==='student' && hasCooc(t.text));
+  const solved = hasSolutionIntent(text);
+  const nMatched = state.matched[key].size;
+  const needForLevel3 = 2;
+  const lengthOk = (key === 'C') ? text.trim().length >= 300 : true;
+  const hasRequiredPairC = state.matched.C.has('loop') && state.matched.C.has('cop');
+
+  let newLevel = 0;
+  if(nMatched >= 1) newLevel = 1;
+  if(nMatched >= 1 && cooc) newLevel = 2;
+  if(key === 'C'){
+    if(hasRequiredPairC && cooc && solved && lengthOk) newLevel = 3;
+  } else {
+    if(nMatched >= needForLevel3 && cooc && solved && lengthOk) newLevel = 3;
+  }
+
+  let aiMsg;
+  if(newLevel > priorLevel){
+    state.level[key] = newLevel;
+    aiMsg = stage.levelMsg[newLevel];
+    if(newLevel >= 3){
+      state.done[key] = true;
+      aiMsg += '\n\n📋 이번 단계 정리\n' + stage.standardSummary;
+    }
+  } else if(key === 'C' && hasRequiredPairC && cooc && solved && !lengthOk){
+    aiMsg = `개념 연결은 좋습니다. 다만 최종 설계안은 Single/Double-loop Learning과 Communities of Practice를 모두 포함해서, 300자 이상으로 조금 더 구체적으로 작성해주시겠어요? (현재 ${text.trim().length}자)`;
+  } else if(turnNew.length > 0){
+    aiMsg = '좋은 개념을 추가로 짚으셨습니다. ' + nextHint(key, priorLevel);
+  } else {
+    aiMsg = nextHint(key, priorLevel);
+  }
+  return { feedback: aiMsg, offTopic: false };
+}
+
+/* =========================================================
+   6) Gemini 기반 판정 (Stage A/B/C) — 실패 시 localJudge로 폴백
+   ========================================================= */
+const GEMINI_PROXY_URL = 'https://script.google.com/macros/s/AKfycbyiwi90p5z-9Zc-JfOzhw1bAAVIa8EPr7_AdWlTCtXkmmM9Mj5Kyw8C28yidBvr-_nDAg/exec';
+const GEMINI_ENABLED_STAGES = ['A','B','C'];
+
+function notifyTermination(key){
+  const payload = {
+    action: 'terminationAlert',
+    studentName: state.studentName,
+    studentNumber: state.studentNumber,
+    stage: key,
+    timestamp: new Date().toISOString(),
+    lastMessages: state.transcript[key].slice(-6).map(t=>`[${t.role}] ${t.text}`).join('\n---\n')
+  };
+  fetch(GEMINI_PROXY_URL, {
+    method: 'POST',
+    headers: {'Content-Type': 'text/plain'},
+    body: JSON.stringify(payload)
+  }).catch(()=>{ /* 알림 실패해도 학생 학습 흐름은 막지 않음 */ });
+}
+
+async function geminiJudge(key, text){
+  const fetchPromise = fetch(GEMINI_PROXY_URL, {
+    method: 'POST',
+    headers: {'Content-Type': 'text/plain'}, // preflight 회피
+    body: JSON.stringify({
+      stage: key,
+      studentAnswer: text,
+      history: state.transcript[key].filter(t => t.role !== 'student' || t.text !== text),
+      studentId: `${state.studentNumber} ${state.studentName}`.trim() || 'preview'
+    })
+  }).then(res => {
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
+  });
+
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => reject(new Error('요청 시간 초과(15초)')), 15000);
+  });
+
+  const data = await Promise.race([fetchPromise, timeoutPromise]);
+  if(data.error) throw new Error(data.message || 'Gemini proxy error');
+
+  if(data.offTopic){
+    return { feedback: '', offTopic: true };
+  }
+
+  data.matchedConcepts.forEach(id => state.matched[key].add(id));
+  state.level[key] = Math.max(state.level[key], Math.min(3, data.level));
+  if(data.done || state.level[key] >= 3) state.done[key] = true;
+
+  let feedback = data.feedback;
+  if(state.done[key]){
+    // 절충안: 학생 개인의 논리를 반영한 짧은 코멘트(Gemini 생성) + 핵심 개념 연결은 고정 문구(모든 학생 동일)
+    const personalNote = (data.summary || '').trim();
+    feedback += '\n\n📋 이번 단계 정리';
+    if(personalNote) feedback += '\n' + personalNote;
+    feedback += '\n\n' + STAGES[key].standardSummary;
+  }
+  return { feedback, offTopic: false };
+}
+
+function showTyping(){
+  const msgList = document.getElementById('msgList');
+  if(!msgList) return;
+  const row = document.createElement('div');
+  row.className = 'msg-row';
+  row.id = 'typingRow';
+  row.innerHTML = `<div class="msg ai" style="opacity:.6; font-family:var(--mono);">AI가 답변을 검토하고 있습니다...</div>`;
+  msgList.appendChild(row);
+}
+function hideTyping(){
+  const row = document.getElementById('typingRow');
+  if(row) row.remove();
+}
+
+async function handleSend(key){
+  const input = document.getElementById('studentInput');
+  const text = input.value.trim();
+  if(!text) return;
+
+  if(!state.gateConfirmed){
+    const gateStatus = document.getElementById('gateStatus');
+    if(gateStatus) gateStatus.textContent = '먼저 위에서 이름과 학번을 입력하고 "확인하고 시작하기"를 눌러주세요.';
+    document.getElementById('idGate') && document.getElementById('idGate').scrollIntoView && document.getElementById('idGate').scrollIntoView({behavior:'smooth'});
+    return;
+  }
+
+  state.transcript[key].push({role:'student', text});
+  input.value = '';
+  renderStageArea(); // 학생 메시지 즉시 반영
+  document.getElementById('sendBtn') && (document.getElementById('sendBtn').disabled = true);
+  showTyping();
+
+  let result;
+  if(GEMINI_ENABLED_STAGES.includes(key)){
+    try {
+      result = await geminiJudge(key, text);
+    } catch(err){
+      console.warn('Gemini 판정 실패, 규칙기반으로 전환:', err);
+      const local = localJudge(key, text);
+      result = { feedback: '(AI 서버 응답이 지연되어 기본 판정 방식으로 전환합니다)\n\n' + local.feedback, offTopic: local.offTopic };
+    }
+  } else {
+    result = localJudge(key, text);
+  }
+
+  hideTyping();
+
+  let aiMsg;
+  if(result.offTopic){
+    state.offTopicCount[key] += 1;
+    if(state.offTopicCount[key] >= 3){
+      state.terminated[key] = true;
+      state.done[key] = false;
+      aiMsg = '⚠ 학습 내용과 무관한 발언이 반복되어 이 사례검토를 종료합니다. 이 Stage는 0점으로 기록됩니다.';
+      notifyTermination(key);
+    } else {
+      aiMsg = offTopicReply(key, state.offTopicCount[key]);
+    }
+  } else {
+    aiMsg = result.feedback;
+  }
+
+  state.transcript[key].push({role:'ai', text: aiMsg});
+  renderStageTabs();
+  renderStageArea();
+}
+
+
+/* =========================================================
+   7) 렌더링
+   ========================================================= */
+function stageFinished(key){
+  return state.done[key] || state.terminated[key];
+}
+
+function renderStageTabs(){
+  document.querySelectorAll('.stage-tab').forEach(tab=>{
+    const key = tab.dataset.stage;
+    tab.classList.toggle('active', key===state.current);
+    tab.classList.toggle('done', state.done[key]);
+    tab.classList.toggle('terminated', state.terminated[key]);
+    const idx = STAGE_ORDER.indexOf(key);
+    const locked = idx>0 && !stageFinished(STAGE_ORDER[idx-1]) && !stageFinished(key);
+    tab.classList.toggle('locked', locked);
+  });
+}
+
+function renderStageArea(){
+  const key = state.current;
+  const stage = STAGES[key];
+  const area = document.getElementById('stageArea');
+
+  if(state.showFinal && STAGE_ORDER.every(k=>stageFinished(k))){
+    area.innerHTML = renderFinalScreen();
+    bindFinalScreen();
+    return;
+  }
+
+  const concepts = CLUSTERS[key];
+  const matched = state.matched[key];
+  const level = state.level[key];
+  const weight = stage.weight[level];
+  const stageIdx = STAGE_ORDER.indexOf(key);
+  const prevKey = stageIdx > 0 ? STAGE_ORDER[stageIdx-1] : null;
+
+  area.innerHTML = `
+    <div class="stage-grid">
+      <div class="chat-panel">
+        <div class="concept-title-row">
+          <div class="concept-title">${stage.label}</div>
+          ${prevKey ? `<button class="ghost small" id="prevStageBtn">◀ ${STAGE_SHORT[prevKey]} 대화 보기</button>` : ''}
+        </div>
+        <div id="msgList"></div>
+        ${state.terminated[key] ? `
+          <div class="terminated-banner">
+            ⚠ 이 사례검토는 학습 내용과 무관한 발언이 반복되어 종료되었습니다. 이 Stage는 0점으로 기록됩니다.
+          </div>
+          <div class="complete-banner">
+            <span>다음 단계로 이동할 수 있습니다.</span>
+            ${STAGE_ORDER.indexOf(key) < STAGE_ORDER.length-1
+              ? `<button id="nextStageBtn">다음 단계 →</button>`
+              : `<button id="toFinalBtn">최종 제출로 이동 →</button>`}
+          </div>
+        ` : state.done[key] ? `
+          <div class="complete-banner">
+            <span>Stage ${key} 완료 — 다음 단계로 이동할 수 있습니다.</span>
+            ${STAGE_ORDER.indexOf(key) < STAGE_ORDER.length-1
+              ? `<button id="nextStageBtn">다음 단계 →</button>`
+              : `<button id="toFinalBtn">최종 제출로 이동 →</button>`}
+          </div>
+        ` : `
+          <div class="composer">
+            <textarea id="studentInput" placeholder="여기에 답변을 작성해주세요..."></textarea>
+            <div class="composer-row">
+              <button class="ghost" id="clearBtn" type="button">지우기</button>
+              <button class="primary" id="sendBtn" type="button">답변 제출</button>
+            </div>
+          </div>
+        `}
+      </div>
+      <aside class="readout">
+        <div class="label">Level 판정</div>
+        <div class="level-badge">${level}<span class="of">/ 3</span></div>
+        <div class="label">점수 반영</div>
+        <div style="font-size:20px; font-weight:800; margin:2px 0 8px;">${weight}%</div>
+        <div class="bar"><div class="bar-fill" style="width:${weight}%"></div></div>
+        <div class="label" style="margin-bottom:8px;">감지된 개념</div>
+        <ul class="concept-list">
+          ${concepts.map(c=>`<li class="${matched.has(c.id)?'hit':''}"><span class="dot"></span>${c.label}</li>`).join('')}
+        </ul>
+      </aside>
+    </div>
+  `;
+
+  const msgList = document.getElementById('msgList');
+  const transcript = state.transcript[key];
+  if(transcript.length===0){
+    transcript.push({role:'ai', text:stage.start});
+  }
+  msgList.innerHTML = transcript.map(m=>`
+    <div class="msg-row"><div class="msg ${m.role==='ai'?'ai':'student'}">${escapeHtml(m.text)}</div></div>
+  `).join('');
+
+  if(prevKey){
+    document.getElementById('prevStageBtn').addEventListener('click', ()=>{
+      state.current = prevKey;
+      renderAll();
+    });
+  }
+
+  if(!stageFinished(key)){
+    document.getElementById('sendBtn').addEventListener('click', ()=>handleSend(key));
+    document.getElementById('clearBtn').addEventListener('click', ()=>{ document.getElementById('studentInput').value=''; });
+    document.getElementById('studentInput').addEventListener('keydown', (e)=>{
+      if(e.key==='Enter' && (e.metaKey||e.ctrlKey)){ handleSend(key); }
+    });
+  } else {
+    const nextBtn = document.getElementById('nextStageBtn');
+    if(nextBtn) nextBtn.addEventListener('click', ()=>{
+      const idx = STAGE_ORDER.indexOf(key);
+      state.current = STAGE_ORDER[idx+1];
+      renderAll();
+    });
+    const finalBtn = document.getElementById('toFinalBtn');
+    if(finalBtn) finalBtn.addEventListener('click', ()=>{
+      state.showFinal = true;
+      renderStageArea();
+    });
+  }
+}
+
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* =========================================================
+   7) 최종 화면 + 제출
+   ========================================================= */
+function renderFinalScreen(){
+  const totalWeight = STAGE_ORDER.reduce((sum,k)=> sum + (state.terminated[k] ? 0 : STAGES[k].weight[state.level[k]]), 0) / 3;
+  const conceptSummary = STAGE_ORDER.map(k=>{
+    if(state.terminated[k]) return `${STAGES[k].label}: (사례검토 종료 — 0점)`;
+    const hit = CLUSTERS[k].filter(c=>state.matched[k].has(c.id)).map(c=>c.label);
+    return `${STAGES[k].label}: ${hit.length? hit.join(', ') : '(감지된 개념 없음)'}`;
+  }).join('\n');
+
+  return `
+    <div class="final-screen">
+      <h2>Stage 1 전체 완료</h2>
+      <p style="color:var(--ink-soft); font-size:14px;">평균 반영 점수: <strong>${totalWeight.toFixed(1)}%</strong></p>
+      <p style="font-size:13px; color:var(--ink-soft); white-space:pre-line; text-align:left; background:#F5F7FA; padding:12px 14px; border-radius:8px;">${conceptSummary}</p>
+      <div class="idbox">
+        <input id="studentName" type="text" placeholder="이름" value="${escapeHtml(state.studentName)}">
+        <input id="studentNumber" type="text" placeholder="학번" value="${escapeHtml(state.studentNumber)}">
+      </div>
+      <div style="display:flex; gap:8px; justify-content:center; margin-top:4px; flex-wrap:wrap;">
+        <button class="primary" id="submitBtn">결과 제출하기</button>
+        <button class="ghost" id="downloadBtn" type="button">대화 내용 다운로드(txt)</button>
+      </div>
+      <div id="submitStatus"></div>
+      <p style="font-size:11.5px; color:var(--ink-soft); margin-top:14px;">
+        "결과 제출하기"를 누르면 담당 교수님의 Google Sheets에 자동으로 기록됩니다.
+        "대화 내용 다운로드"는 지금 이 대화 전체를 텍스트 파일로 내 컴퓨터에 저장합니다 (제출과 별개로, 원하시면 함께 하셔도 됩니다).
+      </p>
+    </div>
+  `;
+}
+
+function bindFinalScreen(){
+  document.getElementById('submitBtn').addEventListener('click', submitResults);
+  document.getElementById('downloadBtn').addEventListener('click', downloadTranscript);
+}
+
+function buildTranscriptLines(){
+  const name = state.studentName || (document.getElementById('studentName')||{}).value || '';
+  const number = state.studentNumber || (document.getElementById('studentNumber')||{}).value || '';
+  const lines = [];
+  lines.push(`K-SemiTech Stage 1 학습 기록`);
+  lines.push(`이름: ${name}   학번: ${number}`);
+  lines.push(`제출 시각: ${new Date().toLocaleString('ko-KR')}`);
+  lines.push('');
+  STAGE_ORDER.forEach(k=>{
+    lines.push(`===== ${STAGES[k].label} (Level ${state.level[k]}/3, ${state.terminated[k]?'종료(0점)':STAGES[k].weight[state.level[k]]+'%'}) =====`);
+    state.transcript[k].forEach(t=>{
+      lines.push(`[${t.role==='ai'?'AI':'학생'}] ${t.text}`);
+    });
+    lines.push('');
+  });
+  return { lines, name, number };
+}
+
+function downloadTranscript(){
+  const { lines, name, number } = buildTranscriptLines();
+  const blob = new Blob([lines.join('\n')], {type:'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `KST_Stage1_${name || '학생'}_${number || ''}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function downloadTranscriptImage(){
+  const { lines, name, number } = buildTranscriptLines();
+
+  const width = 900;
+  const padding = 28;
+  const fontSize = 15;
+  const lineHeight = 24;
+  const font = `${fontSize}px "Malgun Gothic", "Apple SD Gothic Neo", sans-serif`;
+
+  // 줄바꿈 폭 계산용 임시 캔버스
+  const measure = document.createElement('canvas');
+  const mctx = measure.getContext('2d');
+  mctx.font = font;
+  const maxTextWidth = width - padding*2;
+
+  function wrapLine(text){
+    if(text === '') return [''];
+    const out = [];
+    let cur = '';
+    for(const ch of text){
+      const test = cur + ch;
+      if(mctx.measureText(test).width > maxTextWidth && cur){
+        out.push(cur);
+        cur = ch;
+      } else {
+        cur = test;
+      }
+    }
+    out.push(cur);
+    return out;
+  }
+
+  const wrapped = [];
+  lines.forEach(l => { wrapLine(l).forEach(w => wrapped.push(w)); });
+
+  const height = padding*2 + wrapped.length*lineHeight;
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0, width, height);
+  ctx.fillStyle = '#161E2B';
+  ctx.font = font;
+  ctx.textBaseline = 'top';
+  wrapped.forEach((l, i) => {
+    ctx.fillText(l, padding, padding + i*lineHeight);
+  });
+
+  canvas.toBlob(blob => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `KST_Stage1_${name || '학생'}_${number || ''}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 'image/png');
+}
+
+function submitResults(){
+  const nameInput = document.getElementById('studentName');
+  const numberInput = document.getElementById('studentNumber');
+  const studentName = nameInput.value.trim();
+  const studentNumber = numberInput.value.trim();
+  const statusEl = document.getElementById('submitStatus');
+  if(!studentName || !studentNumber){
+    statusEl.textContent = '이름과 학번을 모두 입력해주세요.';
+    statusEl.style.color = 'var(--red)';
+    return;
+  }
+
+  const payload = {
+    action: 'finalSubmit',
+    case: 'K-SemiTech Stage1',
+    studentName,
+    studentNumber,
+    timestamp: new Date().toISOString(),
+    stageA_level: state.level.A, stageA_score: state.terminated.A ? 0 : STAGES.A.weight[state.level.A], stageA_terminated: state.terminated.A,
+    stageB_level: state.level.B, stageB_score: state.terminated.B ? 0 : STAGES.B.weight[state.level.B], stageB_terminated: state.terminated.B,
+    stageC_level: state.level.C, stageC_score: state.terminated.C ? 0 : STAGES.C.weight[state.level.C], stageC_terminated: state.terminated.C,
+    conceptsA: [...state.matched.A].join('; '),
+    conceptsB: [...state.matched.B].join('; '),
+    conceptsC: [...state.matched.C].join('; '),
+    transcriptA: state.transcript.A.map(t=>`[${t.role}] ${t.text}`).join('\n---\n'),
+    transcriptB: state.transcript.B.map(t=>`[${t.role}] ${t.text}`).join('\n---\n'),
+    transcriptC: state.transcript.C.map(t=>`[${t.role}] ${t.text}`).join('\n---\n')
+  };
+
+  statusEl.textContent = '제출 중...';
+  statusEl.style.color = 'var(--ink-soft)';
+
+  fetch(GEMINI_PROXY_URL, {
+    method:'POST',
+    headers:{'Content-Type':'text/plain'},
+    body: JSON.stringify(payload)
+  }).then(res => res.json()).then(data => {
+    if(data.error){
+      statusEl.textContent = '제출 실패: ' + (data.message || '알 수 없는 오류') + ' — 교수님께 문의해주세요.';
+      statusEl.style.color = 'var(--red)';
+    } else {
+      statusEl.textContent = '제출 완료. 창을 닫으셔도 됩니다.';
+      statusEl.style.color = 'var(--green)';
+    }
+  }).catch(()=>{
+    statusEl.textContent = '제출 중 오류가 발생했습니다. 다시 시도해주세요.';
+    statusEl.style.color = 'var(--red)';
+  });
+}
+
+/* =========================================================
+   8) 초기화
+   ========================================================= */
+function renderAll(){
+  renderStageTabs();
+  renderStageArea();
+}
+
+document.querySelectorAll('.stage-tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    if(tab.classList.contains('locked')) return;
+    state.current = tab.dataset.stage;
+    renderAll();
+  });
+});
+
+function confirmGate(){
+  const nameEl = document.getElementById('gateName');
+  const numEl = document.getElementById('gateNumber');
+  const statusEl = document.getElementById('gateStatus');
+  const name = nameEl.value.trim();
+  const number = numEl.value.trim();
+  if(!name || !number){
+    statusEl.textContent = '이름과 학번을 모두 입력해주세요.';
+    return;
+  }
+  state.studentName = name;
+  state.studentNumber = number;
+  state.gateConfirmed = true;
+  statusEl.textContent = '입력하신 이름/학번은 언제든 다시 고치실 수 있습니다. 최종 제출 시 화면에서 한 번 더 확인해주세요.';
+  statusEl.style.color = 'var(--green)';
+  document.getElementById('idGate').classList.add('confirmed');
+}
+document.getElementById('gateConfirmBtn').addEventListener('click', confirmGate);
+
+// 이름/학번은 언제든 실시간으로 수정 가능 — 입력할 때마다 state에 즉시 반영
+document.getElementById('gateName').addEventListener('input', (e)=>{ state.studentName = e.target.value.trim(); });
+document.getElementById('gateNumber').addEventListener('input', (e)=>{ state.studentNumber = e.target.value.trim(); });
+
+renderAll();
+
+/* Debug/testing hook — exposes internal state for QA; harmless in production */
+window.__debug = { state, CLUSTERS, STAGES, renderAll, handleSend, geminiJudge, localJudge, isOffTopic, isTooShort, stageFinished };
+</script>
+</body>
+</html>

@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K-SemiTech HRD Scaffolding System — Stage 1</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jetbrains-mono@1.0.6/css/jetbrains-mono.css">
+<style>
+  :root{
+    --bg:#EDF1F5;
+    --surface:#FFFFFF;
+    --ink:#161E2B;
+    --ink-soft:#4B586A;
+    --line:#D7DEE6;
+    --steel:#2C5C8A;
+    --steel-deep:#1C3E5E;
+    --amber:#D98E2B;
+    --amber-soft:#FBEBD2;
+    --green:#3E7D58;
+    --green-soft:#E1F0E6;
+    --red:#B0442E;
+    --radius:14px;
+    --mono:'JetBrains Mono', ui-monospace, monospace;
+    --sans:'Pretendard', -apple-system, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:var(--sans); line-height:1.62; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:980px; margin:0 auto; padding:28px 20px 80px;}
+
+  /* ---------- Header ---------- */
+  header.top{
+    display:flex; align-items:baseline; justify-content:space-between;
+    padding-bottom:18px; margin-bottom:22px; border-bottom:2px solid var(--steel-deep);
+  }
+  header.top .brand{display:flex; align-items:baseline; gap:10px;}
+  header.top .brand .mark{
+    font-family:var(--mono); font-size:12px; letter-spacing:.08em; color:#fff;
+    background:var(--steel-deep); padding:3px 8px; border-radius:5px;
+  }
+  header.top h1{font-size:19px; margin:0; font-weight:800; letter-spacing:-0.01em;}
+  header.top .stagepill{font-family:var(--mono); font-size:12px; color:var(--ink-soft);}
+
+  .id-gate{
+    background:var(--amber-soft); border:1px solid var(--amber); border-radius:var(--radius);
+    padding:14px 18px; margin-bottom:18px;
+  }
+  .id-gate-row{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .id-gate label{font-size:12.5px; color:var(--ink); display:flex; align-items:center; gap:6px; font-weight:600;}
+  .id-gate input{border:1px solid var(--line); border-radius:7px; padding:7px 10px; font-size:13.5px; width:160px;}
+  .id-gate .gate-status{font-size:12.5px; color:var(--red); font-weight:600;}
+  .id-gate.confirmed{background:var(--green-soft); border-color:var(--green);}
+  .id-gate.confirmed input{background:#fff;}
+
+  /* ---------- Case intro ---------- */
+  .case-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:22px 24px; margin-bottom:18px;
+  }
+  .case-card h2{margin:0 0 10px; font-size:16px; font-weight:800;}
+  .case-card p{margin:0 0 10px; font-size:14.5px; color:#233042;}
+  .case-card p:last-child{margin-bottom:0;}
+  .dilemma{
+    border-left:3px solid var(--amber); background:var(--amber-soft);
+    padding:12px 14px; border-radius:8px; font-size:14px; margin-top:10px;
+  }
+
+  .people{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:18px;}
+  .person{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:16px;
+  }
+  .person .avatar{
+    width:44px; height:44px; border-radius:50%; background:#DEE9F2;
+    display:flex; align-items:center; justify-content:center;
+    font-size:24px; margin-bottom:10px;
+  }
+  .person h3{margin:0 0 2px; font-size:14.5px; font-weight:800;}
+  .person .role{font-size:12px; color:var(--ink-soft); margin-bottom:8px;}
+  .person .voices{font-size:13px; color:#233042; border-top:1px dashed var(--line); padding-top:8px; margin-top:8px;}
+  .person .voices blockquote{margin:0 0 8px; padding-left:10px; border-left:2px solid var(--steel); font-style:italic;}
+
+  /* ---------- Stage tabs ---------- */
+  .stage-tabs{display:flex; gap:8px; margin-bottom:16px;}
+  .stage-tab{
+    flex:1; text-align:center; padding:10px 6px; border-radius:10px;
+    background:#DEE5EC; color:var(--ink-soft); font-weight:700; font-size:13px;
+    border:1px solid transparent; cursor:pointer; position:relative;
+  }
+  .stage-tab .sub{display:block; font-weight:500; font-size:11px; margin-top:2px;}
+  .stage-tab.active{background:var(--steel-deep); color:#fff;}
+  .stage-tab.done{background:var(--green-soft); color:var(--green); border-color:var(--green);}
+  .stage-tab.terminated{background:#FBE4E0; color:var(--red); border-color:var(--red);}
+  .stage-tab.locked{cursor:not-allowed; opacity:.55;}
+
+  /* ---------- Main layout ---------- */
+  .stage-grid{display:grid; grid-template-columns:1fr 260px; gap:16px; align-items:start;}
+  @media (max-width:760px){ .stage-grid{grid-template-columns:1fr;} .people{grid-template-columns:1fr;} }
+
+  .chat-panel{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:20px; min-height:420px; display:flex; flex-direction:column;
+  }
+  .concept-title{font-size:13px; color:var(--ink-soft); font-family:var(--mono); margin-bottom:10px;}
+  .concept-title-row{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:2px;}
+  .concept-title-row .concept-title{margin-bottom:8px;}
+  button.ghost.small{padding:5px 10px; font-size:11.5px; border-radius:6px;}
+  .terminated-banner{
+    background:#FBE4E0; border:1px solid var(--red); color:var(--red);
+    padding:14px 16px; border-radius:10px; font-size:14px; font-weight:700; margin-top:14px;
+  }
+  .msg{max-width:88%; padding:12px 14px; border-radius:12px; font-size:14.5px; margin-bottom:12px; white-space:pre-wrap;}
+  .msg.ai{background:#EEF3F8; border:1px solid #D9E4EE; border-top-left-radius:3px; align-self:flex-start;}
+  .msg.student{background:var(--steel-deep); color:#fff; border-top-right-radius:3px; align-self:flex-end; margin-left:auto;}
+  .msg-row{display:flex;}
+  .composer{margin-top:auto; padding-top:14px; border-top:1px solid var(--line);}
+  textarea{
+    width:100%; min-height:78px; resize:vertical; border:1px solid var(--line); border-radius:10px;
+    padding:10px 12px; font-family:var(--sans); font-size:14px; outline:none;
+  }
+  textarea:focus{border-color:var(--steel);}
+  .composer-row{display:flex; justify-content:flex-end; gap:8px; margin-top:8px;}
+  button.primary{
+    background:var(--steel-deep); color:#fff; border:none; padding:9px 18px;
+    border-radius:8px; font-weight:700; font-size:13.5px; cursor:pointer;
+  }
+  button.primary:hover{background:var(--steel);}
+  button.ghost{
+    background:transparent; color:var(--ink-soft); border:1px solid var(--line);
+    padding:9px 14px; border-radius:8px; font-size:13px; cursor:pointer;
+  }
+  button:disabled{opacity:.5; cursor:not-allowed;}
+
+  /* ---------- Sidebar readout ---------- */
+  .readout{
+    background:var(--steel-deep); color:#EAF1F8; border-radius:var(--radius);
+    padding:16px; font-family:var(--mono); position:sticky; top:16px;
+  }
+  .readout .label{font-size:10.5px; letter-spacing:.08em; color:#9FB6CB; text-transform:uppercase;}
+  .readout .level-badge{
+    font-size:34px; font-weight:800; margin:2px 0 4px; display:flex; align-items:baseline; gap:6px;
+  }
+  .readout .level-badge .of{font-size:13px; color:#9FB6CB;}
+  .readout .bar{height:6px; background:#294D6E; border-radius:4px; overflow:hidden; margin:10px 0 16px;}
+  .readout .bar-fill{height:100%; background:var(--amber); width:0%; transition:width .4s ease;}
+  .readout .concept-list{list-style:none; padding:0; margin:0; font-size:12px;}
+  .readout .concept-list li{
+    display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid #26466A; color:#C4D5E5;
+  }
+  .readout .concept-list li:last-child{border-bottom:none;}
+  .readout .dot{width:8px; height:8px; border-radius:50%; background:#3E5C7C; flex-shrink:0;}
+  .readout .concept-list li.hit .dot{background:#6FE0A0;}
+  .readout .concept-list li.hit{color:#fff;}
+
+  .complete-banner{
+    background:var(--green-soft); border:1px solid var(--green); color:var(--green);
+    padding:14px 16px; border-radius:10px; font-size:14px; font-weight:700; margin-top:14px;
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+  }
+  .complete-banner button{background:var(--green); color:#fff; border:none; padding:8px 14px; border-radius:7px; font-size:13px; cursor:pointer; font-weight:700;}
+
+  .final-screen{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:26px; text-align:center;}
+  .final-screen h2{font-size:20px; margin-top:0;}
+  .idbox{display:flex; gap:8px; justify-content:center; margin:16px 0;}
+  .idbox input{border:1px solid var(--line); border-radius:8px; padding:9px 12px; font-size:14px; width:220px;}
+  #submitStatus{font-size:13px; color:var(--ink-soft); margin-top:10px; font-family:var(--mono);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <span class="mark">KST · HRD-ITS</span>
+      <h1>K-SemiTech Onboarding Learning System</h1>
+    </div>
+    <span class="stagepill">Stage 1 — Adult Learning &amp; Workplace Learning</span>
+  </header>
+
+  <section class="id-gate" id="idGate">
+    <div class="id-gate-row">
+      <label>Name <input id="gateName" type="text" placeholder="e.g., John Smith"></label>
+      <label>Student ID <input id="gateNumber" type="text" placeholder="e.g., 2026001"></label>
+      <button class="primary" id="gateConfirmBtn" type="button">Confirm &amp; Start</button>
+      <span id="gateStatus" class="gate-status"></span>
+    </div>
+  </section>
+
+  <section class="case-card">
+    <h2>Industry Background</h2>
+    <p>K-SemiTech (KST) is a semiconductor and precision-equipment manufacturer with a 20-year track record. Over the past three years, the company has been rapidly adopting AI-based process automation, and it is now facing two changes at once. First, hiring criteria have shifted from education and tenure toward job competency and growth potential, bringing in a more diverse mix of new and experienced employees. Second, as automated equipment replaces existing processes, tension is growing within the organization over whether the tacit knowledge veteran engineers have built up over decades on the floor is still a valid asset — or whether it needs to be reconstructed.</p>
+    <p>The company has long run an onboarding system that combines live-in training with on-site mentoring for new hires. But recent feedback from the HRD team has raised doubts about how well that system is actually working.</p>
+    <div class="dilemma">
+      <strong>Core Dilemma —</strong> Lee Seo-yeon, who leads training design on the HRD team, has to redesign next year's new-hire onboarding program. Then an AI-based anomaly detection system is introduced on the line run by Park Hyun-woo, an 18-year veteran process engineer — and the system flags a process anomaly that Park had judged to be fine. It leaves Park with a fundamental disorienting dilemma: "the way I've made judgment calls for almost 30 years might not be enough anymore." Lee now has to look beyond individual differences in how people learn and ask a bigger question: how should the organization redesign its learning system altogether?
+    </div>
+  </section>
+
+  <section class="people">
+    <div class="person" data-person="1">
+      <div class="avatar">👨‍🔧</div>
+      <h3>Park Hyun-woo</h3>
+      <div class="role">Veteran Process Engineer · 18 years</div>
+      <div class="voices">
+        <blockquote>"I was twenty-eight when I first got assigned to this line. My mentor at the time, Manager Choi, taught me to listen to the sound before I ever looked at the gauges. The moment a motor's sound changes even slightly, you can tell something's wrong — even while the numbers are still in the normal range. How do you even write that down in a manual?"</blockquote>
+        <blockquote>"Last month... the AI system caught an anomaly before I did. In a process I'd judged to be fine. At first I thought it was a glitch. But when we checked, there really was an early-stage anomaly. The machine knew something I didn't."</blockquote>
+        <blockquote>"I keep thinking about it since then. Was what I trusted for almost 30 years really 'insight born of experience' — or was I just lucky? I hate looking shaken in front of the younger engineers. But honestly... I'm not even sure what I should be teaching Ji-soo right now."</blockquote>
+      </div>
+    </div>
+    <div class="person" data-person="2">
+      <div class="avatar">👩‍💻</div>
+      <h3>Kim Ji-soo</h3>
+      <div class="role">New Engineer · 6 months</div>
+      <div class="voices">
+        <blockquote>"I need to understand the principle behind something before I can move forward. Even in college, I always wanted to fully understand the theory before running an experiment. But here, all I hear is 'just try it' or 'watch and learn.'"</blockquote>
+        <blockquote>"Hyun-woo isn't a bad mentor at all. But every time I ask him something and he says, 'well... it's just something you feel,' I get lost. I'm under pressure not to make mistakes, but without a clear explanation of why, it just makes me more anxious."</blockquote>
+        <blockquote>"There is online training material, but it's too generic — it doesn't match what's actually happening on the line. I look things up on YouTube and read papers on my own, but I'm never sure if I'm on the right track... and if I don't do even that, I feel like I'm not learning anything at all."</blockquote>
+      </div>
+    </div>
+    <div class="person" data-person="3">
+      <div class="avatar">👩‍💼</div>
+      <h3>Lee Seo-yeon</h3>
+      <div class="role">HRD Training Design Lead</div>
+      <div class="voices">
+        <blockquote>"I've scrapped three drafts of the onboarding redesign already. My first idea was just 'do more on-site mentoring' — but once I realized even veterans like Hyun-woo are shaken right now, that alone clearly isn't enough. More online content isn't the answer either — Ji-soo's already looking things up on her own way too much."</blockquote>
+        <blockquote>"I don't think this is a question of who's right. Both of them are doing their best in their own way. The real problem is that their two approaches aren't connecting with each other."</blockquote>
+        <blockquote>"Honestly, I'm not sure either. The company wants an 'efficient onboarding program,' but I have a feeling this isn't something one program change can fix. Maybe we need to rethink how the whole organization learns."</blockquote>
+      </div>
+    </div>
+  </section>
+
+  <nav class="stage-tabs" id="stageTabs">
+    <div class="stage-tab active" data-stage="A">1-A<span class="sub">Adult Learning Theory</span></div>
+    <div class="stage-tab locked" data-stage="B">1-B<span class="sub">Transformative Learning</span></div>
+    <div class="stage-tab locked" data-stage="C">1-C<span class="sub">Workplace Learning</span></div>
+  </nav>
+
+  <div id="stageArea"></div>
+
+</div>
+
+<script>
+/* =========================================================
+   1) Case co-occurrence keys
+   ========================================================= */
+const COOC_NAMES = ['park hyun-woo','hyun-woo','park','kim ji-soo','ji-soo','lee seo-yeon','seo-yeon','ai','artificial intelligence','anomaly detection'];
+function normalize(t){ return (t||'').toLowerCase(); }
+function hasCooc(text){
+  const n = normalize(text);
+  return COOC_NAMES.some(x => n.includes(x.toLowerCase()));
+}
+function detectConcept(text, concept){
+  const norm = normalize(text);
+  for(const kw of concept.keywords){
+    const kwNorm = kw.toLowerCase();
+    const idx = norm.indexOf(kwNorm);
+    if(idx !== -1){
+      const s = Math.max(0, idx-14), e = Math.min(norm.length, idx+kwNorm.length+14);
+      const win = norm.slice(s,e);
+      const neg = (concept.negations||[]).some(x=>win.includes(x));
+      if(!neg) return true;
+    }
+  }
+  return false;
+}
+const SOLUTION_WORDS = ['design','propose','proposal','program','create','implement','launch','establish','build','plan','recommend'];
+function hasSolutionIntent(text){
+  const n = normalize(text);
+  return SOLUTION_WORDS.some(w=>n.includes(w));
+}
+function wordCount(text){
+  return (text||'').trim().split(/\s+/).filter(Boolean).length;
+}
+const IDK_PATTERNS = ["don't know","dont know","not sure","no idea","dunno","i'm not sure","not certain","no clue"];
+function isLowEffort(text){
+  const t = (text||'').trim();
+  if(wordCount(t) < 3) return true;
+  const n = normalize(t);
+  return IDK_PATTERNS.some(p=>n.includes(p));
+}
+const MIN_ANSWER_WORDS = 8;
+function isTooShort(text){
+  return wordCount(text) < MIN_ANSWER_WORDS;
+}
+const OFFTOPIC_PATTERNS = [
+  'who are you','what are you','your name','your real name',
+  'just tell me the answer','give me the answer','tell me the answer','just give me the answer',
+  'can you sing','do you sing','are you good at singing','tell me a joke','tell me something fun','i am bored','im bored',
+  'how old are you','your age','are you a boy','are you a girl','favorite food','your hobby',
+  'do you have a girlfriend','do you have a boyfriend','i love you','marry me'
+];
+function isOffTopic(text){
+  const n = normalize(text);
+  return OFFTOPIC_PATTERNS.some(p=>n.includes(p));
+}
+function offTopicReply(key, count){
+  const firstLine = STAGES[key].start.split('\n')[0];
+  let msg = `That doesn't seem related to this case. Shall we get back to the K-SemiTech scenario?\n\n${firstLine}`;
+  if(count === 2){
+    msg += `\n\n⚠ If this happens one more time, this case review will be ended and recorded as 0 points.`;
+  }
+  return msg;
+}
+
+/* =========================================================
+   2) Concept clusters (per stage)
+   ========================================================= */
+const CLUSTERS = {
+  A: [
+    {id:'andragogy', label:'Andragogy', keywords:['andragogy','andragogic','adult learner','adult learners','self-directed learner','learning resource','use their experience','draw on experience','experience as a resource','self-concept'], negations:["doesn't fit","does not fit","not right","incorrect","wrong"]},
+    {id:'kolb', label:"Kolb's Experiential Learning Cycle", keywords:['kolb','experiential learning','concrete experience','reflective observation','abstract conceptualization','active experimentation','learning cycle','experience into learning','experiential learning cycle'], negations:["doesn't fit","not right","wrong"]},
+    {id:'bandura', label:"Bandura's Social Learning (Modelling)", keywords:['bandura','modelling','modeling','observational learning','social learning theory','role model','learn by watching','learn by observing','learns by observing','imitate','imitating'], negations:['not','wrong',"doesn't work",'does not work']},
+    {id:'selfeff', label:'Self-efficacy', keywords:['self-efficacy','self efficacy','magnitude','strength','generality','confidence','belief in his ability','belief in her ability','can do it','i can do this'], negations:["doesn't matter",'does not matter','irrelevant']},
+    {id:'sdl', label:'Self-Directed Learning (SDL)', keywords:['sdl','self-directed learning','self directed','autodidaxy','learner control','personal autonomy','self-management','manage their own learning','plan on their own','learn on their own'], negations:['not right','wrong',"doesn't fit"]},
+    {id:'motiv', label:'Training Motivation/Engagement', keywords:['training motivation','training engagement','motivation to learn','goal setting','goal persistence','engagement','drive to learn','motivated to learn'], negations:["doesn't fit"]},
+    {id:'forminc', label:'Formal/Informal/Incidental Learning', keywords:['formal learning','informal learning','incidental learning','formal','informal','incidental','structured curriculum','no set curriculum','learn on the job','picked up naturally','picked up on the job'], negations:['not','wrong']}
+  ],
+  B: [
+    {id:'tl', label:'Transformative Learning', keywords:['transformative learning','mezirow','perspective transformation','meaning structure','worldview shift','frame of reference','transform his thinking'], negations:['not',"doesn't change",'does not change']},
+    {id:'dd', label:'Disorienting Dilemma', keywords:['disorienting dilemma','dilemma','lost his bearings','shaken','shocking event','belief was shattered','his premise was shaken','disorienting'], negations:['not']},
+    {id:'ct', label:'Critical Thinking', keywords:['critical thinking','critical reflection','question his own assumptions','examine his assumptions','why he believed','questioning his assumptions'], negations:['not needed','not']},
+    {id:'rd', label:'Reflective Discourse', keywords:['reflective discourse','discourse','dialogue','talk it through with others','shared understanding','talking with colleagues','conversation with others'], negations:['not needed','on his own','alone']},
+    {id:'behavior', label:'Behavior', keywords:['behavior','new role','confidence to act','take on a new role','act on it','put it into practice','new way of behaving','confidence to perform'], negations:['not',"doesn't change",'does not change']}
+  ],
+  C: [
+    {id:'loop', label:'Single/Double-loop Learning', keywords:['single-loop','double-loop','single loop','double loop','single-loop learning','double-loop learning','question the underlying assumption','rethink the assumption','re-examine the assumption','change tactics only'], negations:['not','no need']},
+    {id:'cop', label:'Communities of Practice (CoP)', keywords:['communities of practice','community of practice','cop','legitimate peripheral participation','learn together','shared community of learning','practice community'], negations:['no need','not']}
+  ]
+};
+
+/* =========================================================
+   3) Stage scripts (start question + Level 0-3 AI messages)
+   ========================================================= */
+const STAGES = {
+  A: {
+    label:'Stage 1-A · Adult Learning Theory',
+    start: `Lee Seo-yeon has to redesign next year's onboarding program. Explain the differences in how Park Hyun-woo and Kim Ji-soo learn, and — taking that difference into account — what direction would you suggest to Lee Seo-yeon?
+
+(Please include at least one concept from Andragogy, Kolb's Experiential Learning Cycle, Bandura's Social Learning Theory, Formal/Informal/Incidental Learning, or Self-Directed Learning in your answer.)`,
+    levelMsg: {
+      1: `Good — you've pinpointed it. In Kolb's experiential learning theory, what stages does experience have to pass through before it becomes real learning? Where would you say Park and Ji-soo each are in that cycle?`,
+      2: `Exactly. For Ji-soo to learn from it, Park's experience has to become an "observable model." What does Bandura's theory call that? And what psychological factor (self-efficacy) would Ji-soo also need for it to actually work?`,
+      3: `Well done. You've accurately integrated two concepts and proposed a concrete direction. Stage 1-A is complete.`
+    },
+    hints: {
+      0: [
+        `Both of them are already doing their part, yet there's still conflict. Andragogy makes an assumption about what adult learners treat as a "learning resource" — can you explain this using that concept?`,
+        `Here's a bit more of a hint — one of Andragogy's five assumptions is that adults treat their accumulated life experience as raw material for learning. What would it take for Ji-soo to be able to use Park's 18 years of experience as that kind of material?`,
+        `Let me be more direct — try including the phrase "using experience as a resource" in your answer, and add one sentence on whether that describes Park's situation or Ji-soo's.`
+      ],
+      1: [
+        `Your answer doesn't show a new connection beyond what you already mentioned. Could you explain in more detail which stage of Kolb's experiential learning cycle Park and Ji-soo are each stuck at?`,
+        `Here's more of a hint — Kolb's cycle has four stages: Concrete Experience → Reflective Observation → Abstract Conceptualization → Active Experimentation. Park may have plenty of experience but lack reflection/conceptualization, while Ji-soo may be the opposite. Could you answer again from that angle?`,
+        `Let me be more direct — name which stage (experience → reflection → conceptualization → experimentation) each of the two is stuck at, and include those stage names in your answer.`
+      ],
+      2: [
+        `No new concept has come up yet. Using Bandura's observational learning (Modelling) or the idea of self-efficacy, could you explain again how Ji-soo could learn from Park's experience?`,
+        `Here's more of a hint — in Bandura's social learning theory, for Modelling to happen, the person being observed has to clearly demonstrate the behavior, and the observer needs self-efficacy — the belief that "I can do this too." How could Park's experience be turned into something "visible" to observe?`,
+        `Let me be more direct — include both the words "modelling" and "self-efficacy" in your answer, and write one sentence on who each one applies to.`
+      ]
+    },
+    weight: {0:0, 1:25, 2:60, 3:100},
+    standardSummary: `This stage looked at how adult learning theory applies to the onboarding design at K-SemiTech. According to Andragogy, adult learners treat their own experience as a learning resource — and Park Hyun-woo's 18 years on the job is exactly that kind of resource. In Kolb's experiential learning theory, Park has rich concrete experience but is weak at the stage of turning that experience into concepts and language (Abstract Conceptualization), while Ji-soo wants that conceptualization and active experimentation first, but lacks the concrete experience to build on. Bandura's social learning theory emphasizes that for observational learning (Modelling) to happen, self-efficacy has to be present as well — Ji-soo needs the chance to directly observe and try out Park's on-the-floor judgment process, and in doing so, develop her own belief that "I can do this too." The distinction in Marsick & Watkins' workplace learning types makes the difference between the two even clearer — Park is used to Informal Learning, picked up on the job with no set curriculum, while Ji-soo pursues a learning style grounded in Formal Learning, structured like a manual or a lecture course. In the end, Lee Seo-yeon's onboarding program needs to integrate these concepts — structuring Park's experience into an observable form while also meeting Ji-soo's need for self-directed learning.`
+  },
+  B: {
+    label:"Stage 1-B · Mezirow's Transformative Learning Theory",
+    start: `Now let's step into Park Hyun-woo's perspective. After the AI anomaly-detection system caught a process issue before he did — one he had judged to be fine — he says, "the way I've made judgment calls for almost 30 years might not be enough anymore."
+
+If you were Lee Seo-yeon, how would you understand the psychological change Park is going through, and what would you do to help him?
+
+(Please include a concept you learned from Mezirow's transformative learning theory.)`,
+    levelMsg: {
+      1: `That's the right term. Can you explain which specific experience of Park's — and why — was "disorienting"?`,
+      2: `Good. Mezirow argued that after this dilemma, a person needs to go through Critical Thinking and Reflective Discourse. Where is Park in that process right now, and what hasn't happened yet?`,
+      3: `Exactly right. You've traced the whole arc of transformative learning and proposed a concrete direction for intervention. Stage 1-B is complete.`
+    },
+    hints: {
+      0: [
+        `What he's going through right now isn't simple fatigue — his belief system itself is being shaken. Mezirow's theory has a concept for this kind of event. Does it come to mind?`,
+        `Here's more of a hint — Mezirow called an event that shatters an assumption you'd always taken for granted a "disorienting dilemma." What was the "taken-for-granted assumption" for Park, and how was it broken?`,
+        `Let me be more direct — include the term "disorienting dilemma" in your answer, and connect it in one sentence to the specific event Park experienced (the AI detecting the anomaly first).`
+      ],
+      1: [
+        `I'm not seeing a new explanation yet. Could you go into more detail about which specific experience of Park's was disorienting, and why?`,
+        `Here's more of a hint — Park held the premise that "my experience is the answer," and the AI broke that premise. Could you unpack this a bit more concretely?`,
+        `Let me be more direct — include the phrase "his belief was shattered" or "his premise was shaken" in your answer, and add one sentence on why that happened.`
+      ],
+      2: [
+        `The next step still hasn't come up. Could you explain again which one — Critical Thinking or Reflective Discourse — Park needs right now?`,
+        `Here's more of a hint — Critical Thinking means questioning for yourself why you believed what you believed; Reflective Discourse means revisiting that belief through conversation with others. Which of the two does Park need right now?`,
+        `Let me be more direct — include either "critical thinking" or "reflective discourse" in your answer, and propose in one sentence what kind of setting could be arranged for Park.`
+      ]
+    },
+    weight: {0:0, 1:25, 2:60, 3:100},
+    standardSummary: `This stage traced Park Hyun-woo's psychological shift through Mezirow's transformative learning theory. Transformative learning isn't simply extending existing cognitive abilities into a new area — it's a dramatic, fundamental transformation of the meaning structure you've taken for granted. The process has four components. First, in the Experience stage, new meaning emerges from an experience, and the trigger is a Disorienting Dilemma — an event that challenges your existing way of thinking. For Park, that's the moment the AI system detected a process anomaly before he did. Second, in the Critical Thinking stage, he critically examines the assumptions and beliefs he held, based on that experience. Third, in the Reflective Discourse stage, he works toward shared understanding and interpretive meaning through dialogue with others. Finally, in the Behavior stage, he gains the confidence to take on a new role. For Park to fully move through these four stages, Lee Seo-yeon needs to create a space where he can safely reflect (Critical Thinking) and talk with colleagues (Reflective Discourse), ultimately leading to the confidence (Behavior) to act in a new role.`
+  },
+  C: {
+    label:'Stage 1-C · Workplace Learning Integration',
+    start: `Bringing everything together — what kind of program should Lee Seo-yeon design to address this at the organizational level?
+
+(Please use both Single/Double-loop Learning and Communities of Practice, and write at least 150 words.)`,
+    levelMsg: {
+      1: `Good — you've pinpointed it. Could you connect this concept to Park's situation or another specific detail of the case?`,
+      2: `Good — you've connected it well to the case. Now, using both Single/Double-loop Learning and Communities of Practice, could you propose a concrete program Lee Seo-yeon could run, in at least 150 words?`,
+      3: `Excellent. You've used both Single/Double-loop Learning and Communities of Practice to complete a program design. This completes all of Stage 1. Review your learning results below.`
+    },
+    hints: {
+      0: [
+        `For Lee Seo-yeon to address this at the organizational level, she first needs to work out whether the current situation calls for "just changing tactics" or "fundamentally re-examining the underlying assumption." There was a theory that makes exactly this distinction — does it come to mind?`,
+        `Here's more of a hint — it's Argyris & Schön's concept of Single-loop/Double-loop Learning. Which one is Park stuck in right now, and which one does he need to move toward?`,
+        `Let me be more direct — include the phrase "double-loop learning" in your answer, and write one sentence naming the "assumption" Park needs to re-examine.`
+      ],
+      1: [
+        `You've identified Single/Double-loop Learning. Now, to sustain this at the organizational level, what kind of "group" or "relationship" would be needed so Park doesn't end up isolated?`,
+        `Here's more of a hint — it's Lave & Wenger's concept of Communities of Practice. Building a community that learns together through legitimate peripheral participation is one way to do this.`,
+        `Let me be more direct — include the phrase "communities of practice" or "CoP" in your answer, and write one sentence on whether the company should formally support this community.`
+      ],
+      2: [
+        `Your final proposal needs to include both Single/Double-loop Learning and Communities of Practice (CoP). It looks like one of the two is still missing — could you include both and explain again?`,
+        `Here's more of a hint — apply Double-loop Learning (re-examining the underlying assumption) and CoP (learning through a community of practice) to Park's situation, one sentence each.`,
+        `Let me be more direct — include both "double-loop" and "communities of practice" in your answer, and propose a concrete program in at least 150 words.`
+      ]
+    },
+    weight: {0:0, 1:20, 2:50, 3:100},
+    standardSummary: `This stage integrated organization-level learning systems through Single/Double-loop Learning and Communities of Practice. If Single-loop Learning means only adjusting tactics in response to a problem, Double-loop Learning means re-examining the underlying assumption itself. Facing a structural change like AI adoption, Park's case calls for double-loop-level reflection. At the same time, for that reflection to become an organizational asset rather than staying with one individual, the organization needs to build what Lave & Wenger called a Community of Practice — a community that learns together through legitimate peripheral participation. Lee Seo-yeon's final task is to decide whether the company should formally support this community of practice or let it form organically, and to design a concrete program to match that choice.`
+  }
+};
+const STAGE_ORDER = ['A','B','C'];
+const STAGE_SHORT = {A:'1-A', B:'1-B', C:'1-C'};
+
+/* =========================================================
+   4) State
+   ========================================================= */
+const state = {
+  current: 'A',
+  matched: {A:new Set(), B:new Set(), C:new Set()},
+  level: {A:0, B:0, C:0},
+  done: {A:false, B:false, C:false},
+  terminated: {A:false, B:false, C:false},
+  offTopicCount: {A:0, B:0, C:0},
+  transcript: {A:[], B:[], C:[]},
+  stuckIdx: {A:{0:0,1:0,2:0}, B:{0:0,1:0,2:0}, C:{0:0,1:0,2:0}},
+  showFinal: false,
+  studentName: '',
+  studentNumber: '',
+  gateConfirmed: false
+};
+
+function nextHint(stageKey, level){
+  const arr = STAGES[stageKey].hints[level];
+  const idx = Math.min(state.stuckIdx[stageKey][level], arr.length - 1);
+  state.stuckIdx[stageKey][level] = Math.min(state.stuckIdx[stageKey][level] + 1, arr.length - 1);
+  return arr[idx];
+}
+
+/* =========================================================
+   5) Rule-based judging (used for Stage B/C fallback + Stage A fallback)
+   ========================================================= */
+function localJudge(key, text){
+  if(isOffTopic(text)){
+    return { feedback: '', offTopic: true };
+  }
+
+  const stage = STAGES[key];
+  const concepts = CLUSTERS[key];
+  const priorLevel = state.level[key];
+  const lowEffort = isLowEffort(text);
+  const tooShort = !lowEffort && isTooShort(text);
+
+  if(lowEffort){
+    const hint = nextHint(key, priorLevel);
+    return { feedback: "No worries — let's take a moment and think it through again.\n\n" + hint, offTopic: false };
+  }
+  if(tooShort){
+    return { feedback: `Could you go into a bit more detail — at least ${MIN_ANSWER_WORDS} words or so?`, offTopic: false };
+  }
+
+  // Newly-detected concepts always accumulate (added if found, judgment continues either way)
+  const turnNew = concepts.filter(c => !state.matched[key].has(c.id) && detectConcept(text, c));
+  turnNew.forEach(c => state.matched[key].add(c.id));
+
+  const cooc = hasCooc(text) || state.transcript[key].some(t => t.role==='student' && hasCooc(t.text));
+  const solved = hasSolutionIntent(text);
+  const nMatched = state.matched[key].size;
+  const needForLevel3 = 2;
+  const lengthOk = (key === 'C') ? wordCount(text) >= 150 : true;
+  const hasRequiredPairC = state.matched.C.has('loop') && state.matched.C.has('cop');
+
+  let newLevel = 0;
+  if(nMatched >= 1) newLevel = 1;
+  if(nMatched >= 1 && cooc) newLevel = 2;
+  if(key === 'C'){
+    if(hasRequiredPairC && cooc && solved && lengthOk) newLevel = 3;
+  } else {
+    if(nMatched >= needForLevel3 && cooc && solved && lengthOk) newLevel = 3;
+  }
+
+  let aiMsg;
+  if(newLevel > priorLevel){
+    state.level[key] = newLevel;
+    aiMsg = stage.levelMsg[newLevel];
+    if(newLevel >= 3){
+      state.done[key] = true;
+      aiMsg += '\n\n📋 Stage Summary\n' + stage.standardSummary;
+    }
+  } else if(key === 'C' && hasRequiredPairC && cooc && solved && !lengthOk){
+    aiMsg = `Good conceptual connections. Your final proposal just needs to include both Single/Double-loop Learning and Communities of Practice, in at least 150 words. (Currently ${wordCount(text)} words)`;
+  } else if(turnNew.length > 0){
+    aiMsg = "Good, you've raised another concept. " + nextHint(key, priorLevel);
+  } else {
+    aiMsg = nextHint(key, priorLevel);
+  }
+  return { feedback: aiMsg, offTopic: false };
+}
+
+/* =========================================================
+   6) Gemini-based judging (Stage A/B/C) — falls back to localJudge on failure
+   ========================================================= */
+const GEMINI_PROXY_URL = 'https://script.google.com/macros/s/AKfycbzOgIZhMcSmkxQJRRniaAvkBtDzDIEGPmJ9-UEMD5ha0Q_NRZKDiSBrqtBa1zIhIQj_/exec';
+const GEMINI_ENABLED_STAGES = ['A','B','C'];
+
+function notifyTermination(key){
+  const payload = {
+    action: 'terminationAlert',
+    studentName: state.studentName,
+    studentNumber: state.studentNumber,
+    stage: key,
+    timestamp: new Date().toISOString(),
+    lastMessages: state.transcript[key].slice(-6).map(t=>`[${t.role}] ${t.text}`).join('\n---\n')
+  };
+  fetch(GEMINI_PROXY_URL, {
+    method: 'POST',
+    headers: {'Content-Type': 'text/plain'},
+    body: JSON.stringify(payload)
+  }).catch(()=>{ /* notification failure should not block the student's flow */ });
+}
+
+async function geminiJudge(key, text){
+  const fetchPromise = fetch(GEMINI_PROXY_URL, {
+    method: 'POST',
+    headers: {'Content-Type': 'text/plain'}, // avoids CORS preflight
+    body: JSON.stringify({
+      stage: key,
+        studentAnswer: text,
+      history: state.transcript[key].filter(t => t.role !== 'student' || t.text !== text),
+      studentId: `${state.studentNumber} ${state.studentName}`.trim() || 'preview'
+    })
+  }).then(res => {
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
+  });
+
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => reject(new Error('Request timed out (15s)')), 15000);
+  });
+
+  const data = await Promise.race([fetchPromise, timeoutPromise]);
+  if(data.error) throw new Error(data.message || 'Gemini proxy error');
+
+  if(data.offTopic){
+    return { feedback: '', offTopic: true };
+  }
+
+  data.matchedConcepts.forEach(id => state.matched[key].add(id));
+  state.level[key] = Math.max(state.level[key], Math.min(3, data.level));
+  if(data.done || state.level[key] >= 3) state.done[key] = true;
+
+  let feedback = data.feedback;
+  if(state.done[key]){
+    // Hybrid: a short personalized note reflecting the student's own reasoning (Gemini-generated)
+    // + the core concept summary, which is fixed and identical for every student
+    const personalNote = (data.summary || '').trim();
+    feedback += '\n\n📋 Stage Summary';
+    if(personalNote) feedback += '\n' + personalNote;
+    feedback += '\n\n' + STAGES[key].standardSummary;
+  }
+  return { feedback, offTopic: false };
+}
+
+function showTyping(){
+  const msgList = document.getElementById('msgList');
+  if(!msgList) return;
+  const row = document.createElement('div');
+  row.className = 'msg-row';
+  row.id = 'typingRow';
+  row.innerHTML = `<div class="msg ai" style="opacity:.6; font-family:var(--mono);">AI is reviewing your answer...</div>`;
+  msgList.appendChild(row);
+}
+function hideTyping(){
+  const row = document.getElementById('typingRow');
+  if(row) row.remove();
+}
+
+async function handleSend(key){
+  const input = document.getElementById('studentInput');
+  const text = input.value.trim();
+  if(!text) return;
+
+  if(!state.gateConfirmed){
+    const gateStatus = document.getElementById('gateStatus');
+    if(gateStatus) gateStatus.textContent = 'Please enter your name and student ID above, and click "Confirm & Start" first.';
+    document.getElementById('idGate') && document.getElementById('idGate').scrollIntoView && document.getElementById('idGate').scrollIntoView({behavior:'smooth'});
+    return;
+  }
+
+  state.transcript[key].push({role:'student', text});
+  input.value = '';
+  renderStageArea(); // reflect the student's message immediately
+  document.getElementById('sendBtn') && (document.getElementById('sendBtn').disabled = true);
+  showTyping();
+
+  let result;
+  if(GEMINI_ENABLED_STAGES.includes(key)){
+    try {
+      result = await geminiJudge(key, text);
+    } catch(err){
+      console.warn('Gemini judging failed, switching to rule-based fallback:', err);
+      const local = localJudge(key, text);
+      result = { feedback: '(The AI server response was delayed, so we switched to the standard judging method.)\n\n' + local.feedback, offTopic: local.offTopic };
+    }
+  } else {
+    result = localJudge(key, text);
+  }
+
+  hideTyping();
+
+  let aiMsg;
+  if(result.offTopic){
+    state.offTopicCount[key] += 1;
+    if(state.offTopicCount[key] >= 3){
+      state.terminated[key] = true;
+      state.done[key] = false;
+      aiMsg = '⚠ This case review is being ended because of repeated off-topic remarks. This stage will be recorded as 0 points.';
+      notifyTermination(key);
+    } else {
+      aiMsg = offTopicReply(key, state.offTopicCount[key]);
+    }
+  } else {
+    aiMsg = result.feedback;
+  }
+
+  state.transcript[key].push({role:'ai', text: aiMsg});
+  renderStageTabs();
+  renderStageArea();
+}
+
+
+/* =========================================================
+   7) Rendering
+   ========================================================= */
+function stageFinished(key){
+  return state.done[key] || state.terminated[key];
+}
+
+function renderStageTabs(){
+  document.querySelectorAll('.stage-tab').forEach(tab=>{
+    const key = tab.dataset.stage;
+    tab.classList.toggle('active', key===state.current);
+    tab.classList.toggle('done', state.done[key]);
+    tab.classList.toggle('terminated', state.terminated[key]);
+    const idx = STAGE_ORDER.indexOf(key);
+    const locked = idx>0 && !stageFinished(STAGE_ORDER[idx-1]) && !stageFinished(key);
+    tab.classList.toggle('locked', locked);
+  });
+}
+
+function renderStageArea(){
+  const key = state.current;
+  const stage = STAGES[key];
+  const area = document.getElementById('stageArea');
+
+  if(state.showFinal && STAGE_ORDER.every(k=>stageFinished(k))){
+    area.innerHTML = renderFinalScreen();
+    bindFinalScreen();
+    return;
+  }
+
+  const concepts = CLUSTERS[key];
+  const matched = state.matched[key];
+  const level = state.level[key];
+  const weight = stage.weight[level];
+  const stageIdx = STAGE_ORDER.indexOf(key);
+  const prevKey = stageIdx > 0 ? STAGE_ORDER[stageIdx-1] : null;
+
+  area.innerHTML = `
+    <div class="stage-grid">
+      <div class="chat-panel">
+        <div class="concept-title-row">
+          <div class="concept-title">${stage.label}</div>
+          ${prevKey ? `<button class="ghost small" id="prevStageBtn">◀ View ${STAGE_SHORT[prevKey]} conversation</button>` : ''}
+        </div>
+        <div id="msgList"></div>
+        ${state.terminated[key] ? `
+          <div class="terminated-banner">
+            ⚠ This case review was ended due to repeated off-topic remarks. This stage is recorded as 0 points.
+          </div>
+          <div class="complete-banner">
+            <span>You can move to the next stage.</span>
+            ${STAGE_ORDER.indexOf(key) < STAGE_ORDER.length-1
+              ? `<button id="nextStageBtn">Next stage →</button>`
+              : `<button id="toFinalBtn">Go to final submission →</button>`}
+          </div>
+        ` : state.done[key] ? `
+          <div class="complete-banner">
+            <span>Stage ${key} complete — you can move to the next stage.</span>
+            ${STAGE_ORDER.indexOf(key) < STAGE_ORDER.length-1
+              ? `<button id="nextStageBtn">Next stage →</button>`
+              : `<button id="toFinalBtn">Go to final submission →</button>`}
+          </div>
+        ` : `
+          <div class="composer">
+            <textarea id="studentInput" placeholder="Write your answer here..."></textarea>
+            <div class="composer-row">
+              <button class="ghost" id="clearBtn" type="button">Clear</button>
+              <button class="primary" id="sendBtn" type="button">Submit Answer</button>
+            </div>
+          </div>
+        `}
+      </div>
+      <aside class="readout">
+        <div class="label">Level</div>
+        <div class="level-badge">${level}<span class="of">/ 3</span></div>
+        <div class="label">Score Applied</div>
+        <div style="font-size:20px; font-weight:800; margin:2px 0 8px;">${weight}%</div>
+        <div class="bar"><div class="bar-fill" style="width:${weight}%"></div></div>
+        <div class="label" style="margin-bottom:8px;">Detected Concepts</div>
+        <ul class="concept-list">
+          ${concepts.map(c=>`<li class="${matched.has(c.id)?'hit':''}"><span class="dot"></span>${c.label}</li>`).join('')}
+        </ul>
+      </aside>
+    </div>
+  `;
+
+  const msgList = document.getElementById('msgList');
+  const transcript = state.transcript[key];
+  if(transcript.length===0){
+    transcript.push({role:'ai', text:stage.start});
+  }
+  msgList.innerHTML = transcript.map(m=>`
+    <div class="msg-row"><div class="msg ${m.role==='ai'?'ai':'student'}">${escapeHtml(m.text)}</div></div>
+  `).join('');
+
+  if(prevKey){
+    document.getElementById('prevStageBtn').addEventListener('click', ()=>{
+      state.current = prevKey;
+      renderAll();
+    });
+  }
+
+  if(!stageFinished(key)){
+    document.getElementById('sendBtn').addEventListener('click', ()=>handleSend(key));
+    document.getElementById('clearBtn').addEventListener('click', ()=>{ document.getElementById('studentInput').value=''; });
+    document.getElementById('studentInput').addEventListener('keydown', (e)=>{
+      if(e.key==='Enter' && (e.metaKey||e.ctrlKey)){ handleSend(key); }
+    });
+  } else {
+    const nextBtn = document.getElementById('nextStageBtn');
+    if(nextBtn) nextBtn.addEventListener('click', ()=>{
+      const idx = STAGE_ORDER.indexOf(key);
+      state.current = STAGE_ORDER[idx+1];
+      renderAll();
+    });
+    const finalBtn = document.getElementById('toFinalBtn');
+    if(finalBtn) finalBtn.addEventListener('click', ()=>{
+      state.showFinal = true;
+      renderStageArea();
+    });
+  }
+}
+
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* =========================================================
+   8) Final screen + submission
+   ========================================================= */
+function renderFinalScreen(){
+  const totalWeight = STAGE_ORDER.reduce((sum,k)=> sum + (state.terminated[k] ? 0 : STAGES[k].weight[state.level[k]]), 0) / 3;
+  const conceptSummary = STAGE_ORDER.map(k=>{
+    if(state.terminated[k]) return `${STAGES[k].label}: (case review ended — 0 points)`;
+    const hit = CLUSTERS[k].filter(c=>state.matched[k].has(c.id)).map(c=>c.label);
+    return `${STAGES[k].label}: ${hit.length? hit.join(', ') : '(no concepts detected)'}`;
+  }).join('\n');
+
+  return `
+    <div class="final-screen">
+      <h2>Stage 1 Complete</h2>
+      <p style="color:var(--ink-soft); font-size:14px;">Average score: <strong>${totalWeight.toFixed(1)}%</strong></p>
+      <p style="font-size:13px; color:var(--ink-soft); white-space:pre-line; text-align:left; background:#F5F7FA; padding:12px 14px; border-radius:8px;">${conceptSummary}</p>
+      <div class="idbox">
+        <input id="studentName" type="text" placeholder="Name" value="${escapeHtml(state.studentName)}">
+        <input id="studentNumber" type="text" placeholder="Student ID" value="${escapeHtml(state.studentNumber)}">
+      </div>
+      <div style="display:flex; gap:8px; justify-content:center; margin-top:4px; flex-wrap:wrap;">
+        <button class="primary" id="submitBtn">Submit Results</button>
+        <button class="ghost" id="downloadBtn" type="button">Download Conversation (txt)</button>
+      </div>
+      <div id="submitStatus"></div>
+      <p style="font-size:11.5px; color:var(--ink-soft); margin-top:14px;">
+        Clicking "Submit Results" automatically records your results in your professor's Google Sheet.
+        "Download Conversation" saves the full conversation to your computer as a text file (separate from submission — you're welcome to do both).
+      </p>
+    </div>
+  `;
+}
+
+function bindFinalScreen(){
+  document.getElementById('submitBtn').addEventListener('click', submitResults);
+  document.getElementById('downloadBtn').addEventListener('click', downloadTranscript);
+}
+
+function buildTranscriptLines(){
+  const name = state.studentName || (document.getElementById('studentName')||{}).value || '';
+  const number = state.studentNumber || (document.getElementById('studentNumber')||{}).value || '';
+  const lines = [];
+  lines.push(`K-SemiTech Stage 1 Learning Record`);
+  lines.push(`Name: ${name}   Student ID: ${number}`);
+  lines.push(`Submitted: ${new Date().toLocaleString('en-US')}`);
+  lines.push('');
+  STAGE_ORDER.forEach(k=>{
+    lines.push(`===== ${STAGES[k].label} (Level ${state.level[k]}/3, ${state.terminated[k]?'Ended (0%)':STAGES[k].weight[state.level[k]]+'%'}) =====`);
+    state.transcript[k].forEach(t=>{
+      lines.push(`[${t.role==='ai'?'AI':'Student'}] ${t.text}`);
+    });
+    lines.push('');
+  });
+  return { lines, name, number };
+}
+
+function downloadTranscript(){
+  const { lines, name, number } = buildTranscriptLines();
+  const blob = new Blob([lines.join('\n')], {type:'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `KST_Stage1_${name || 'student'}_${number || ''}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function submitResults(){
+  const nameInput = document.getElementById('studentName');
+  const numberInput = document.getElementById('studentNumber');
+  const studentName = nameInput.value.trim();
+  const studentNumber = numberInput.value.trim();
+  const statusEl = document.getElementById('submitStatus');
+  if(!studentName || !studentNumber){
+    statusEl.textContent = 'Please enter both your name and student ID.';
+    statusEl.style.color = 'var(--red)';
+    return;
+  }
+
+  const payload = {
+    action: 'finalSubmit',
+    case: 'K-SemiTech Stage1 (EN)',
+    studentName,
+    studentNumber,
+    timestamp: new Date().toISOString(),
+    stageA_level: state.level.A, stageA_score: state.terminated.A ? 0 : STAGES.A.weight[state.level.A], stageA_terminated: state.terminated.A,
+    stageB_level: state.level.B, stageB_score: state.terminated.B ? 0 : STAGES.B.weight[state.level.B], stageB_terminated: state.terminated.B,
+    stageC_level: state.level.C, stageC_score: state.terminated.C ? 0 : STAGES.C.weight[state.level.C], stageC_terminated: state.terminated.C,
+    conceptsA: [...state.matched.A].join('; '),
+    conceptsB: [...state.matched.B].join('; '),
+    conceptsC: [...state.matched.C].join('; '),
+    transcriptA: state.transcript.A.map(t=>`[${t.role}] ${t.text}`).join('\n---\n'),
+    transcriptB: state.transcript.B.map(t=>`[${t.role}] ${t.text}`).join('\n---\n'),
+    transcriptC: state.transcript.C.map(t=>`[${t.role}] ${t.text}`).join('\n---\n')
+  };
+
+  statusEl.textContent = 'Submitting...';
+  statusEl.style.color = 'var(--ink-soft)';
+
+  fetch(GEMINI_PROXY_URL, {
+    method:'POST',
+    headers:{'Content-Type':'text/plain'},
+    body: JSON.stringify(payload)
+  }).then(res => res.json()).then(data => {
+    if(data.error){
+      statusEl.textContent = 'Submission failed: ' + (data.message || 'unknown error') + ' — please contact your professor.';
+      statusEl.style.color = 'var(--red)';
+    } else {
+      statusEl.textContent = 'Submission complete. You may close this window.';
+      statusEl.style.color = 'var(--green)';
+    }
+  }).catch(()=>{
+    statusEl.textContent = 'An error occurred while submitting. Please try again.';
+    statusEl.style.color = 'var(--red)';
+  });
+}
+
+/* =========================================================
+   9) Initialization
+   ========================================================= */
+function renderAll(){
+  renderStageTabs();
+  renderStageArea();
+}
+
+document.querySelectorAll('.stage-tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    if(tab.classList.contains('locked')) return;
+    state.current = tab.dataset.stage;
+    renderAll();
+  });
+});
+
+function confirmGate(){
+  const nameEl = document.getElementById('gateName');
+  const numEl = document.getElementById('gateNumber');
+  const statusEl = document.getElementById('gateStatus');
+  const name = nameEl.value.trim();
+  const number = numEl.value.trim();
+  if(!name || !number){
+    statusEl.textContent = 'Please enter both your name and student ID.';
+    return;
+  }
+  state.studentName = name;
+  state.studentNumber = number;
+  state.gateConfirmed = true;
+  statusEl.textContent = 'You can edit your name/ID at any time. Please double-check them once more on the final submission screen.';
+  statusEl.style.color = 'var(--green)';
+  document.getElementById('idGate').classList.add('confirmed');
+}
+document.getElementById('gateConfirmBtn').addEventListener('click', confirmGate);
+
+// Name/ID can be edited at any time — state updates live as the student types
+document.getElementById('gateName').addEventListener('input', (e)=>{ state.studentName = e.target.value.trim(); });
+document.getElementById('gateNumber').addEventListener('input', (e)=>{ state.studentNumber = e.target.value.trim(); });
+
+renderAll();
+
+/* Debug/testing hook — exposes internal state for QA; harmless in production */
+window.__debug = { state, CLUSTERS, STAGES, renderAll, handleSend, geminiJudge, localJudge, isOffTopic, isTooShort, stageFinished, wordCount };
+</script>
+</body>
+</html>
